@@ -30,11 +30,7 @@ class AuthMiddleware {
         return next(BaseError.unauthorized("Invalid Token"));
       }
 
-      if (
-        decoded.role !== Role.SUPER_ADMIN &&
-        decoded.role !== Role.ADMIN_ICICYTA &&
-        decoded.role !== Role.ADMIN_ICODSA
-      ) {
+      if (decoded.role !== Role.STUDENT && decoded.role !== Role.ADMIN) {
         return next(BaseError.unauthorized("Invalid Token"));
       }
 

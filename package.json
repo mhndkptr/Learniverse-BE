@@ -15,7 +15,7 @@
     "build": "npx babel src --out-dir dist --extensions \".js,.jsx\"",
     "test": "echo \"Error: no test specified\" && exit 1",
     "format": "biome format src --write",
-    "seed:super-admin": "node dist/seeders/superAdmin-seed.js"
+    "seed:admin": "node dist/seeders/admin-seed.js"
   },
   "repository": {
     "type": "git",

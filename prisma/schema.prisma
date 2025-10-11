@@ -50,7 +50,7 @@ model Course {
   updated_at    DateTime  @updatedAt
   deleted_at    DateTime?
 
-  @@map("courses") // nama tabel plural seperti "users"
+  @@map("courses")   
 }
 
 

@@ -15,7 +15,11 @@
     "build": "npx babel src --out-dir dist --extensions \".js,.jsx\"",
     "test": "echo \"Error: no test specified\" && exit 1",
     "format": "biome format src --write",
-    "seed:admin": "node dist/seeders/admin-seed.js"
+    "seed:admin": "node dist/seeders/admin-seed.js",
+    "seed": "node prisma/seed.js"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.js"
   },
   "repository": {
     "type": "git",
@@ -34,6 +38,7 @@
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "cross-env": "^10.1.0",
+    "crypto": "^1.0.1",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "express-query-parser": "^1.3.3",

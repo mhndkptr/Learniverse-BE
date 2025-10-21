@@ -20,6 +20,32 @@ enum UserRole {
   STUDENT
 }
 
+enum CourseEnrollmentRole {
+  MEMBER
+  MENTOR
+}
+
+enum MentorStatus {
+  ACCEPTED
+  REJECTED
+  ON_REVIEW
+}
+
+enum QuizStatus {
+  PUBLISH
+  DRAFT
+}
+
+enum QuizQuestionType {
+  MULTIPLE_CHOICE
+  SINGLE_CHOICE
+}
+
+enum QuizAttemptStatus {
+  ON_PROGRESS
+  FINISHED
+}
+
 model User {
   id           String    @id @default(uuid())
   name         String
@@ -29,28 +55,220 @@ model User {
   password     String
   profile_uri  String?
   role         UserRole
-  banned_at    DateTime?
   verified_at  DateTime?
-  last_login   DateTime?
   created_at   DateTime  @default(now())
   updated_at   DateTime  @updatedAt
   deleted_at   DateTime?
+
+  mentors                             Mentor[]
+  course_transactions                 CourseTransaction[]
+  course_enrollments                  CourseEnrollment[]
+  quiz_attempts                       QuizAttempt[]
 
   @@map("users")
 }
 
 model Course {
-  id            String    @id @default(uuid())
-  title         String
-  code          String    @unique
-  description   String?
-  mentor_id     String
-  material_url  String?
-  created_at    DateTime  @default(now())
-  updated_at    DateTime  @updatedAt
-  deleted_at    DateTime?
+  id                                  String    @id @default(uuid())
+  title                               String
+  description                         String?
+  content                             String
+  code                                String    @unique
+  cover_uri                           String
+  price                               Float
+  is_open_registration_member         Boolean   @default(false)
+  is_open_registration_mentor         Boolean   @default(false)
+
+  created_at                          DateTime  @default(now())
+  updated_at                          DateTime  @updatedAt
+  deleted_at                          DateTime?
+
+  course_enrollments                  CourseEnrollment[]
+  course_transactions                 CourseTransaction[]
+  schedules                           Schedule[]
+  mentors                             Mentor[]
+  moduls                              Modul[]
+  quizzes                             Quiz[]
+
 
   @@map("courses")   
+}
+
+model CourseTransaction {
+  id                String           @id @default(uuid())
+  transaction_token String?
+  redirect_url      String?
+  payment_method    String?
+  status            String?
+  settlement_time   DateTime?
+  user_id           String
+  course_id         String
+
+  created_at        DateTime         @default(now())
+  updated_at        DateTime         @updatedAt
+
+  user              User             @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  course            Course           @relation(fields: [course_id], references: [id], onDelete: Cascade)
+
+  @@map("course_transactions")
+}
+
+model CourseEnrollment {
+  id              String         @id @default(uuid())
+  joined_at       DateTime       @default(now())
+  left_at         DateTime?
+  role            CourseEnrollmentRole
+  user_id         String
+  course_id       String
+
+  created_at      DateTime  @default(now())
+  updated_at      DateTime  @updatedAt
+
+  user            User           @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  course          Course         @relation(fields: [course_id], references: [id], onDelete: Cascade)
+
+  @@map("course_enrollments")
+}
+
+model Modul {
+  id               String         @id @default(uuid())
+  title            String       
+  description      String      
+  file_name        String 
+  modul_uri        String
+  course_id        String
+
+  created_at       DateTime  @default(now())
+  updated_at       DateTime  @updatedAt
+
+  course           Course         @relation(fields: [course_id], references: [id], onDelete: Cascade)
+
+  @@map("moduls")
+}
+
+model Mentor {
+  id               String         @id @default(uuid())
+  bio              String       
+  reason           String      
+  motivation       String 
+  cv_uri           String
+  portfolio_uri    String
+  status           MentorStatus   @default(ON_REVIEW)
+  user_id          String
+  course_id        String
+
+  created_at       DateTime  @default(now())
+  updated_at       DateTime  @updatedAt
+
+  user             User           @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  course           Course         @relation(fields: [course_id], references: [id], onDelete: Cascade)
+
+  @@map("mentors")
+}
+
+model Schedule {
+  id               String         @id @default(uuid())
+  title            String
+  description      String
+  start_time       DateTime
+  end_time         DateTime
+  course_id        String
+
+  created_at       DateTime  @default(now())
+  updated_at       DateTime  @updatedAt
+
+  course           Course         @relation(fields: [course_id], references: [id], onDelete: Cascade)
+
+  @@map("schedules")
+}
+
+model Quiz {
+  id            String    @id @default(uuid())
+  title         String
+  description   String
+  status        QuizStatus
+  show_review   Boolean   @default(false)
+  end_date      DateTime
+  start_date    DateTime
+  max_attempt   Int
+  duration      Int
+  course_id     String
+
+  created_at    DateTime  @default(now())
+  updated_at    DateTime  @updatedAt
+
+  course          Course         @relation(fields: [course_id], references: [id], onDelete: Cascade)
+  quiz_questions  QuizQuestion[]
+  quiz_attempts   QuizAttempt[]  
+  
+  @@map("quizzes")
+}
+
+model QuizQuestion {
+  id          String    @id @default(uuid())
+  question    String
+  type        QuizQuestionType
+  image_uri   String?
+  quiz_id     String
+
+  created_at    DateTime  @default(now())
+  updated_at    DateTime  @updatedAt
+
+  quiz                          Quiz  @relation(fields: [quiz_id], references: [id], onDelete: Cascade)
+  quiz_option_answers           QuizOptionAnswer[]
+  quiz_attempt_question_answers QuizAttemptQuestionAnswer[]
+
+  @@map("quiz_questions")
+}
+
+model QuizOptionAnswer {
+  id                  String      @id @default(uuid())
+  answer              String
+  image_uri           String?
+  is_correct          Boolean
+  quiz_question_id    String
+
+  created_at          DateTime  @default(now())
+  updated_at          DateTime  @updatedAt
+
+  quiz_question                   QuizQuestion  @relation(fields: [quiz_question_id], references: [id], onDelete: Cascade)
+  quiz_attempt_question_answers   QuizAttemptQuestionAnswer[]
+
+  @@map("quiz_option_answers")
+}
+
+model QuizAttempt {
+  id            String    @id @default(uuid())
+  status        QuizAttemptStatus
+  start_at      DateTime
+  finish_at     DateTime
+  quiz_id       String
+  user_id       String
+
+  created_at          DateTime  @default(now())
+  updated_at          DateTime  @updatedAt
+
+  user                            User           @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  quiz                            Quiz  @relation(fields: [quiz_id], references: [id], onDelete: Cascade)
+  quiz_attempt_question_answers   QuizAttemptQuestionAnswer[]
+
+  @@map("quiz_attempts")
+}
+
+model QuizAttemptQuestionAnswer {
+  id                      String      @id @default(uuid())
+  quiz_attempt_id         String
+  quiz_question_id        String
+  quiz_option_answer_id   String
+
+  created_at                DateTime  @default(now())
+  updated_at                DateTime  @updatedAt
+
+  quiz_attempt              QuizAttempt  @relation(fields: [quiz_attempt_id], references: [id], onDelete: Cascade)
+  quiz_question             QuizQuestion  @relation(fields: [quiz_question_id], references: [id], onDelete: Cascade)
+  quiz_option_answer        QuizOptionAnswer  @relation(fields: [quiz_option_answer_id], references: [id], onDelete: Cascade)
+
+  @@map("quiz_attempt_question_answers")
 }
 
 

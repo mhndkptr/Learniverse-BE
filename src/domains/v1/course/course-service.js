@@ -1,60 +1,80 @@
-import prisma from "../../../common/services/prisma-service.js";
+import BaseError from "../../../base-classes/base-error.js";
+import { PrismaService } from "../../../common/services/prisma-service.js";
 import path from "path";
 import fs from "fs";
 
-export const getAllCourses = async () => {
-  return prisma.course.findMany({
-    where: { deletedAt: null },
-  });
-};
-
-export const getCourseById = async (id) => {
-  return prisma.course.findUnique({
-    where: { id },
-  });
-};
-
-export const createCourse = async (data, mentorId) => {
-  return prisma.course.create({
-    data: {
-      ...data,
-      mentorId,
-    },
-  });
-};
-
-export const updateCourse = async (id, data) => {
-  return prisma.course.update({
-    where: { id },
-    data,
-  });
-};
-
-export const deleteCourse = async (id) => {
-  return prisma.course.update({
-    where: { id },
-    data: { deletedAt: new Date() },
-  });
-};
-
-// Upload materi file (PDF, PPT)
-export const uploadMaterial = async (courseId, file) => {
-  const course = await prisma.course.findUnique({ where: { id: courseId } });
-  if (!course) throw new Error("Course not found");
-
-  const uploadsDir = path.join(process.cwd(), "uploads", "materials");
-
-  // Pastikan folder ada
-  if (!fs.existsSync(uploadsDir)) {
-    fs.mkdirSync(uploadsDir, { recursive: true });
+class CourseService {
+  constructor() {
+    this.prisma = new PrismaService();
   }
 
-  const filePath = path.join(uploadsDir, file.originalname);
+  async getAll() {
+    return this.prisma.course.findMany({
+      where: { deleted_at: null },
+    });
+  }
 
-  fs.renameSync(file.path, filePath);
+  async getById(id) {
+    const course = await this.prisma.course.findUnique({ where: { id } });
+    if (!course) throw BaseError.notFound("Course not found");
+    return course;
+  }
 
-  return prisma.course.update({
-    where: { id: courseId },
-    data: { materialUrl: `/uploads/materials/${file.originalname}` },
-  });
-};
+  async create(data) {
+    const existing = await this.prisma.course.findFirst({
+      where: { code: data.code },
+    });
+    if (existing) throw BaseError.duplicate("Course code already exists");
+
+    const course = await this.prisma.course.create({ data });
+    return course;
+  }
+
+  async update(id, data) {
+    const course = await this.prisma.course.findUnique({ where: { id } });
+    if (!course) throw BaseError.notFound("Course not found");
+
+    const updated = await this.prisma.course.update({
+      where: { id },
+      data,
+    });
+    return updated;
+  }
+
+  async remove(id) {
+    const course = await this.prisma.course.findUnique({ where: { id } });
+    if (!course) throw BaseError.notFound("Course not found");
+
+    await this.prisma.course.update({
+      where: { id },
+      data: { deleted_at: new Date() },
+    });
+    return { message: "Course deleted successfully" };
+  }
+
+  async uploadMaterial(courseId, file) {
+    const course = await this.prisma.course.findUnique({ where: { id: courseId } });
+    if (!course) throw BaseError.notFound("Course not found");
+    if (!file) throw BaseError.badRequest("No file uploaded");
+
+    const uploadsDir = path.join(process.cwd(), "uploads", "materials");
+    if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+
+    const targetPath = path.join(uploadsDir, file.originalname);
+    fs.renameSync(file.path, targetPath);
+
+    const modul = await this.prisma.modul.create({
+      data: {
+        title: file.originalname,
+        description: "",
+        file_name: file.originalname,
+        modul_uri: `/uploads/materials/${file.originalname}`,
+        course_id: courseId,
+      },
+    });
+
+    return modul;
+  }
+}
+
+export default new CourseService();

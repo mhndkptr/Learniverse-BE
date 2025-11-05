@@ -1,81 +1,44 @@
+import CourseService from "./course-service.js";
 import {
-    getAllCourses,
-    getCourseById,
-    createCourse,
-    updateCourse,
-    deleteCourse,
-    uploadMaterial,
-  } from "./course-service.js";
-  
-  import { createCourseSchema, updateCourseSchema } from "./course-schema.js";
-  
-  export const getAll = async (req, res, next) => {
-    try {
-      const courses = await getAllCourses();
-      res.json({ success: true, data: courses });
-    } catch (error) {
-      next(error);
-    }
-  };
-  
-  export const getById = async (req, res, next) => {
-    try {
-      const { id } = req.params;
-      const course = await getCourseById(id);
-      if (!course) return res.status(404).json({ success: false, message: "Course not found" });
-      res.json({ success: true, data: course });
-    } catch (error) {
-      next(error);
-    }
-  };
-  
-  export const create = async (req, res, next) => {
-    try {
-      const { error, value } = createCourseSchema.validate(req.body);
-      if (error) return res.status(400).json({ success: false, message: error.message });
-  
-      // Mentor ID diambil dari JWT user yang login
-      const mentorId = req.user.id;
-  
-      const course = await createCourse(value, mentorId);
-      res.status(201).json({ success: true, data: course });
-    } catch (error) {
-      next(error);
-    }
-  };
-  
-  export const update = async (req, res, next) => {
-    try {
-      const { id } = req.params;
-      const { error, value } = updateCourseSchema.validate(req.body);
-      if (error) return res.status(400).json({ success: false, message: error.message });
-  
-      const course = await updateCourse(id, value);
-      res.json({ success: true, data: course });
-    } catch (error) {
-      next(error);
-    }
-  };
-  
-  export const remove = async (req, res, next) => {
-    try {
-      const { id } = req.params;
-      await deleteCourse(id);
-      res.json({ success: true, message: "Course deleted" });
-    } catch (error) {
-      next(error);
-    }
-  };
-  
-  export const upload = async (req, res, next) => {
-    try {
-      const { id } = req.params;
-      if (!req.file) return res.status(400).json({ success: false, message: "No file uploaded" });
-  
-      const updatedCourse = await uploadMaterial(id, req.file);
-      res.json({ success: true, data: updatedCourse });
-    } catch (error) {
-      next(error);
-    }
-  };
-  
+  successResponse,
+  createdResponse,
+  updatedResponse,
+} from "../../../utils/response.js";
+
+class CourseController {
+  async getAll(req, res) {
+    const courses = await CourseService.getAll();
+    return successResponse(res, courses, "Courses retrieved successfully");
+  }
+
+  async getById(req, res) {
+    const { id } = req.params;
+    const course = await CourseService.getById(id);
+    return successResponse(res, course, "Course retrieved successfully");
+  }
+
+  async create(req, res) {
+    const data = await CourseService.create(req.body);
+    return createdResponse(res, data, "Course created successfully");
+  }
+
+  async update(req, res) {
+    const { id } = req.params;
+    const data = await CourseService.update(id, req.body);
+    return updatedResponse(res, data, "Course updated successfully");
+  }
+
+  async remove(req, res) {
+    const { id } = req.params;
+    const result = await CourseService.remove(id);
+    return successResponse(res, result, "Course deleted successfully");
+  }
+
+  async upload(req, res) {
+    const { id } = req.params;
+    const modul = await CourseService.uploadMaterial(id, req.file);
+    return successResponse(res, modul, "Material uploaded successfully");
+  }
+}
+
+export default new CourseController();

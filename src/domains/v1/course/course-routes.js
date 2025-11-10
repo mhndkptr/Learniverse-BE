@@ -1,26 +1,45 @@
-import express from "express";
+import BaseRoutes from "../../../base-classes/base-routes.js";
 import multer from "multer";
-import {
-  getAll,
-  getById,
-  create,
-  update,
-  remove,
-  upload,
-} from "./course-controller.js";
-import { verifyToken } from "../../../middlewares/auth-token-middleware.js";
+import { createCourseSchema, updateCourseSchema } from "./course-schema.js";
+import validateCredentials from "../../../middlewares/validate-credentials-middleware.js";
+import authTokenMiddleware from "../../../middlewares/auth-token-middleware.js";
+import tryCatch from "../../../utils/tryCatcher.js";
+import courseController from "./course-controller.js";
 
-const router = express.Router();
-const uploadFile = multer({ dest: "uploads/materials/" });
+const upload = multer({ dest: "uploads/materials/" });
 
-// Public
-router.get("/", getAll);
-router.get("/:id", getById);
+class CourseRoutes extends BaseRoutes {
+  routes() {
+    this.router.get("/", tryCatch(courseController.getAll));
+    this.router.get("/:id", tryCatch(courseController.getById));
 
-// Protected (Admin/Mentor)
-router.post("/", verifyToken, create);
-router.put("/:id", verifyToken, update);
-router.delete("/:id", verifyToken, remove);
-router.post("/:id/material", verifyToken, uploadFile.single("file"), upload);
+    this.router.post(
+      "/",
+      authTokenMiddleware.authenticate,
+      validateCredentials(createCourseSchema),
+      tryCatch(courseController.create)
+    );
 
-export default router;
+    this.router.put(
+      "/:id",
+      authTokenMiddleware.authenticate,
+      validateCredentials(updateCourseSchema),
+      tryCatch(courseController.update)
+    );
+
+    this.router.delete(
+      "/:id",
+      authTokenMiddleware.authenticate,
+      tryCatch(courseController.remove)
+    );
+
+    this.router.post(
+      "/:id/material",
+      authTokenMiddleware.authenticate,
+      upload.single("file"),
+      tryCatch(courseController.upload)
+    );
+  }
+}
+
+export default new CourseRoutes().router;

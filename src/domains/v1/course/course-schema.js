@@ -1,44 +1,79 @@
 import Joi from "joi";
 
-
 const createCourseSchema = Joi.object({
-  title: Joi.string().min(3).max(100).required().messages({
-    "string.empty": "Title is required.",
-    "string.min": "Title must be at least 3 characters.",
-    "string.max": "Title must be at most 100 characters.",
-  }),
-  code: Joi.string().alphanum().min(3).max(10).required().messages({
-    "string.empty": "Code is required.",
-    "string.alphanum": "Code must be alphanumeric.",
-    "string.min": "Code must be at least 3 characters.",
-    "string.max": "Code must be at most 10 characters.",
-  }),
-  content: Joi.string().required().messages({
-    "string.empty": "Content is required.",
-  }),
-  cover_uri: Joi.string().uri().required().messages({
-    "string.empty": "Cover URI is required.",
-    "string.uri": "Cover URI must be a valid URL.",
-  }),
-  price: Joi.number().positive().required().messages({
-    "number.base": "Price must be a number.",
-    "number.positive": "Price must be positive.",
-    "any.required": "Price is required.",
-  }),
-  description: Joi.string().allow("").optional(),
-  is_open_registration_member: Joi.boolean().optional(),
-  is_open_registration_mentor: Joi.boolean().optional(),
+  title: Joi.string().min(3).max(150).required(),
+  description: Joi.string().allow("", null).optional(),
+  content: Joi.string().allow("", null).required(),
+  code: Joi.string().alphanum().min(3).max(10).required(),
+
+  cover_uri: Joi.string().required(),
+
+  price: Joi.number().min(0).precision(2).required(),
+
+  is_open_registration_member: Joi.boolean().default(false),
+  is_open_registration_mentor: Joi.boolean().default(false),
+}).messages({
+  "any.required": "All required fields must be provided.",
 });
 
 const updateCourseSchema = Joi.object({
-  title: Joi.string().min(3).max(100).optional(),
+  title: Joi.string().min(3).max(150).optional(),
+  description: Joi.string().allow("", null).optional(),
+  content: Joi.string().allow("", null).optional(),
   code: Joi.string().alphanum().min(3).max(10).optional(),
-  content: Joi.string().optional(),
-  cover_uri: Joi.string().uri().optional(),
-  price: Joi.number().positive().optional(),
-  description: Joi.string().allow("").optional(),
+
+  cover_uri: Joi.string().optional(),
+  price: Joi.number().min(0).precision(2).optional(),
+
   is_open_registration_member: Joi.boolean().optional(),
   is_open_registration_mentor: Joi.boolean().optional(),
+}).min(1).messages({
+  "object.min": "At least one field must be provided for update.",
 });
 
-export { createCourseSchema, updateCourseSchema };
+const getAllCourseParamsSchema = Joi.object({
+  get_all: Joi.boolean().optional().default(false),
+
+  pagination: Joi.object({
+    page: Joi.number().integer().min(1).default(1),
+    limit: Joi.number().integer().min(1).max(100).default(10),
+  }).optional(),
+
+  order_by: Joi.array()
+    .items(
+      Joi.object({
+        field: Joi.string()
+          .valid("title", "price", "created_at", "updated_at")
+          .required(),
+        direction: Joi.string().valid("asc", "desc").default("asc"),
+      })
+    )
+    .optional(),
+
+  include_relation: Joi.array()
+    .items(
+      Joi.string().valid(
+        "mentors",
+        "moduls",
+        "quizzes",
+        "course_enrollments",
+        "course_transactions",
+        "schedules"
+      )
+    )
+    .optional(),
+
+  search: Joi.string().allow("", null).optional(),
+
+  filter: Joi.object({
+
+    is_open_registration_member: Joi.boolean().optional(),
+    is_open_registration_mentor: Joi.boolean().optional()
+  }).optional(),
+});
+
+export {
+  createCourseSchema,
+  updateCourseSchema,
+  getAllCourseParamsSchema,
+};

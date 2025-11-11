@@ -1,34 +1,40 @@
 import BaseRoutes from "../../../base-classes/base-routes.js";
-import { createScheduleSchema, updateScheduleSchema } from "./schedule-schema.js";
-import validateCredentials from "../../../middlewares/validate-credentials-middleware.js";
 import authTokenMiddleware from "../../../middlewares/auth-token-middleware.js";
+import validateCredentials from "../../../middlewares/validate-credentials-middleware.js";
+import validateQueryParamsCredentials from "../../../middlewares/validate-query-params-credentials-middleware.js";
 import tryCatch from "../../../utils/tryCatcher.js";
-import scheduleController from "./schedule-controller.js";
+import ScheduleController from "./schedule-controller.js";
+import {
+  createScheduleSchema,
+  updateScheduleSchema,
+  getAllScheduleParamsSchema,
+} from "./schedule-schema.js";
 
 class ScheduleRoutes extends BaseRoutes {
   routes() {
-    this.router.get("/", tryCatch(scheduleController.getAll));
-    this.router.get("/:id", tryCatch(scheduleController.getById));
+    this.router.get("/", [
+      validateQueryParamsCredentials(getAllScheduleParamsSchema),
+      tryCatch(ScheduleController.getAll),
+    ]);
 
-    this.router.post(
-      "/",
+    this.router.get("/:id", [tryCatch(ScheduleController.getById)]);
+
+    this.router.post("/", [
       authTokenMiddleware.authenticate,
       validateCredentials(createScheduleSchema),
-      tryCatch(scheduleController.create)
-    );
+      tryCatch(ScheduleController.create),
+    ]);
 
-    this.router.put(
-      "/:id",
+    this.router.patch("/:id", [
       authTokenMiddleware.authenticate,
       validateCredentials(updateScheduleSchema),
-      tryCatch(scheduleController.update)
-    );
+      tryCatch(ScheduleController.update),
+    ]);
 
-    this.router.delete(
-      "/:id",
+    this.router.delete("/:id", [
       authTokenMiddleware.authenticate,
-      tryCatch(scheduleController.remove)
-    );
+      tryCatch(ScheduleController.delete),
+    ]);
   }
 }
 

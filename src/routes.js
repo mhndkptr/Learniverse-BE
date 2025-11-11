@@ -4,6 +4,7 @@ import courseRoutes from "./domains/v1/course/course-routes.js";
 import scheduleRoutes from "./domains/v1/schedule/schedule-routes.js";
 import quizRoutes from "./domains/v1/quiz/quiz-routes.js";
 import userRoutes from "./domains/v1/user/user-routes.js";
+import modulRoutes from "./domains/v1/modul/modul-routes.js";
 
 const router = express.Router();
 
@@ -13,6 +14,8 @@ const appsV1Routes = [
   { path: "/schedule", route: scheduleRoutes },
   { path: "/quiz", route: quizRoutes },
   { path: "/user", route: userRoutes },
+  { path: "/schedule", route: scheduleRoutes }, 
+  { path: "/modul", route: modulRoutes },
 ];
 
 appsV1Routes.forEach(({ path, route }) => {

@@ -4,12 +4,12 @@ import errorHandler from "./middlewares/error-handler-middleware.js";
 import express from "express";
 import helmet from "helmet";
 import logger from "./utils/logger.js";
-import { queryParser } from "express-query-parser";
 import cookieParser from "cookie-parser";
 import morgan from "morgan";
 import routes from "./routes.js";
 import corsMiddleware from "./middlewares/cors-middleware.js";
 import BaseError from "./base-classes/base-error.js";
+import QueryString from "qs";
 
 class ExpressApplication {
   app;
@@ -18,6 +18,13 @@ class ExpressApplication {
   constructor(port) {
     this.app = express();
     this.port = port;
+
+    this.app.set("query parser", (str) =>
+      QueryString.parse(str, {
+        allowDots: true,
+        depth: 10,
+      })
+    );
 
     //  __init__
     this.setupMiddlewares([
@@ -28,11 +35,6 @@ class ExpressApplication {
       cookieParser(),
       express.json(),
       express.urlencoded({ extended: false }),
-      queryParser({
-        parseNull: true,
-        parseBoolean: true,
-        parseNumber: true,
-      }),
     ]);
     this.setupRoute();
     // Error Handler

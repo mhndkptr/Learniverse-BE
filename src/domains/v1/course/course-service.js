@@ -1,79 +1,112 @@
-import BaseError from "../../../base-classes/base-error.js";
+import Joi from "joi";
 import { PrismaService } from "../../../common/services/prisma-service.js";
-import path from "path";
-import fs from "fs";
+import { buildQueryOptions } from "../../../utils/buildQueryOptions.js";
+import BaseError from "../../../base-classes/base-error.js";
+import courseQueryConfig from "./course-query-config.js";
+import Role from "../../../common/enums/role-enum.js";
 
 class CourseService {
   constructor() {
     this.prisma = new PrismaService();
   }
 
-  async getAll() {
-    return this.prisma.course.findMany({
-      where: { deleted_at: null },
-    });
+  async getAll(query = {}) {
+    const options = buildQueryOptions(courseQueryConfig, query);
+
+    const [data, count] = await Promise.all([
+      this.prisma.course.findMany({
+        ...options,
+        include: {
+          mentors: {
+            select: {
+              id: true,
+              bio: true,
+              reason: true,
+              motivation: true,
+              cv_uri: true,
+              portfolio_uri: true,
+              status: true,
+              user: {
+                select: {
+                  id: true,
+                  name: true,
+                  email: true,
+                },
+              },
+            },
+          },
+          schedules: true,
+          moduls: true,
+          quizzes: true,
+        },
+      }),
+      this.prisma.course.count({ where: options.where }),
+    ]);
+
+    const page = query?.pagination?.page ?? 1;
+    const limit = query?.pagination?.limit ?? 10;
+    const totalPages = Math.ceil(count / limit);
+
+    return {
+      data,
+      meta: {
+        totalItems: count,
+        totalPages,
+        currentPage: page,
+        itemsPerPage: limit,
+      },
+    };
   }
 
   async getById(id) {
-    const course = await this.prisma.course.findUnique({ where: { id } });
-    if (!course) throw BaseError.notFound("Course not found");
-    return course;
-  }
-
-  async create(data) {
-    const existing = await this.prisma.course.findFirst({
-      where: { code: data.code },
-    });
-    if (existing) throw BaseError.duplicate("Course code already exists");
-
-    const course = await this.prisma.course.create({ data });
-    return course;
-  }
-
-  async update(id, data) {
-    const course = await this.prisma.course.findUnique({ where: { id } });
-    if (!course) throw BaseError.notFound("Course not found");
-
-    const updated = await this.prisma.course.update({
+    const data = await this.prisma.course.findFirst({
       where: { id },
-      data,
-    });
-    return updated;
-  }
-
-  async remove(id) {
-    const course = await this.prisma.course.findUnique({ where: { id } });
-    if (!course) throw BaseError.notFound("Course not found");
-
-    await this.prisma.course.update({
-      where: { id },
-      data: { deleted_at: new Date() },
-    });
-    return { message: "Course deleted successfully" };
-  }
-
-  async uploadMaterial(courseId, file) {
-    const course = await this.prisma.course.findUnique({ where: { id: courseId } });
-    if (!course) throw BaseError.notFound("Course not found");
-    if (!file) throw BaseError.badRequest("No file uploaded");
-
-    const uploadsDir = path.join(process.cwd(), "uploads", "materials");
-    if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
-
-    const targetPath = path.join(uploadsDir, file.originalname);
-    fs.renameSync(file.path, targetPath);
-
-    const modul = await this.prisma.modul.create({
-      data: {
-        title: file.originalname,
-        description: "",
-        file_name: file.originalname,
-        modul_uri: `/uploads/materials/${file.originalname}`,
-        course_id: courseId,
+      include: {
+        mentors: {
+          select: {
+            id: true,
+            bio: true,
+            reason: true,
+            motivation: true,
+            cv_uri: true,
+            portfolio_uri: true,
+            status: true,
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+              },
+            },
+          },
+        },
+        schedules: true,
+        moduls: true,
+        quizzes: true,
       },
     });
 
-    return modul;
+    if (!data) throw BaseError.notFound("Course not found.");
+    return data;
+  }
+
+  async create(value, user) {
+    return await this.prisma.course.create({ data: value });
+  }
+
+  async update(id, value, user) {
+    const exist = await this.prisma.course.findFirst({ where: { id } });
+    if (!exist) throw BaseError.notFound("Course not found.");
+
+    return await this.prisma.course.update({ where: { id }, data: value });
+  }
+
+  async delete(id, user) {
+    const exist = await this.prisma.course.findFirst({ where: { id } });
+    if (!exist) throw BaseError.notFound("Course not found.");
+
+    const deleted = await this.prisma.course.delete({ where: { id } });
+    return { data: deleted, message: "Course permanently deleted." };
   }
 }
 

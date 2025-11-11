@@ -32,6 +32,7 @@
   },
   "homepage": "https://github.com/mhndkptr/Learniverse-BE#readme",
   "dependencies": {
+    "@joi/date": "^2.1.1",
     "@prisma/client": "^6.16.3",
     "bcryptjs": "^3.0.2",
     "compression": "^1.8.1",

@@ -66,7 +66,7 @@ const createQuizSchema = Joi.object({
   description: Joi.string().allow(null, ""),
 
   type: Joi.string()
-    .valid(QuizType.MAIN, QuizType.PARALLEL)
+    .valid(QuizType.PUBLISH, QuizType.DRAFT)
     .required()
     .messages({
       "any.only": `Type must be one of: ${Object.values(QuizType).join(", ")}`,

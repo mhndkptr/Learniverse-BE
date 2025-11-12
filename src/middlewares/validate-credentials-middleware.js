@@ -12,6 +12,7 @@ const validateCredentials = (schema) => (req, res, next) => {
   if (validated.error) {
     next(validated.error);
   } else {
+    req.body = validated.value;
     next();
   }
 };

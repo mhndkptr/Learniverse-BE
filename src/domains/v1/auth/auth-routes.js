@@ -1,5 +1,6 @@
 import BaseRoutes from "../../../base-classes/base-routes.js";
 import authTokenMiddleware from "../../../middlewares/auth-token-middleware.js";
+import uploadFile from "../../../middlewares/upload-file-middleware.js";
 import validateCredentials from "../../../middlewares/validate-credentials-middleware.js";
 import tryCatch from "../../../utils/tryCatcher.js";
 import authController from "./auth-controller.js";
@@ -15,6 +16,7 @@ class AuthRoutes extends BaseRoutes {
 
     this.router.post(
       "/register",
+      uploadFile("image").single("image_profile"),
       validateCredentials(registerSchema),
       tryCatch(authController.register)
     );

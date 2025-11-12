@@ -33,11 +33,14 @@ class AuthController {
     const { name, email, username, phone_number, password } = req.body;
 
     const data = await AuthService.register(
-      name,
-      email,
-      username,
-      phone_number,
-      password
+      {
+        name,
+        email,
+        username,
+        phone_number,
+        password,
+      },
+      req.file
     );
 
     return successResponse(res, data.user, "Registration successful");

@@ -8,9 +8,15 @@ import {
 
 class UserController {
 	async getAll(req, res) {
-		const users = await UserService.getAll();
-		return successResponse(res, users, "Users retrieved successfully");
+	const result = await UserService.getAll(req.validatedQuery || {});
+	return successResponse(
+		res,
+		result.data,
+		"Users retrieved successfully",
+		result.meta
+	);
 	}
+
 
 	async getById(req, res) {
 		const { id } = req.params;
@@ -35,11 +41,6 @@ class UserController {
 		return successResponse(res, result, "User deleted successfully");
 	}
 
-	async uploadProfile(req, res) {
-		const { id } = req.params;
-		const profile = await UserService.uploadProfile(id, req.file);
-		return successResponse(res, profile, "Profile uploaded successfully");
-	}
 }
 
 export default new UserController();

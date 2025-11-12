@@ -270,6 +270,3 @@ model QuizAttemptQuestionAnswer {
 
   @@map("quiz_attempt_question_answers")
 }
-
-
-

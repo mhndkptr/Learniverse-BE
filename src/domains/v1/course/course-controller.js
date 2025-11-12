@@ -21,14 +21,15 @@ class CourseController {
 
   async create(req, res) {
     if (!req.body) throw BaseError.badRequest("Request body is missing");
-    const data = await CourseService.create(req.body, req.user);
+    if (!req.file) throw BaseError.badRequest("Image file is missing");
+    const data = await CourseService.create(req.body, req.user, req.file);
     return createdResponse(res, data, "Course created successfully");
   }
 
   async update(req, res) {
     const { id } = req.params;
     if (!req.body) throw BaseError.badRequest("Request body is missing");
-    const data = await CourseService.update(id, req.body, req.user);
+    const data = await CourseService.update(id, req.body, req.user, req.file);
     return successResponse(res, data, "Course updated successfully");
   }
 

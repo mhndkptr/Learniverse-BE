@@ -91,7 +91,7 @@ class AuthService {
     if (file) {
       const uploadResult = await this.cloudinary.uploadFromBufferToCloudinary(
         file.buffer,
-        "profile-pictures"
+        "user/profile"
       );
       if (uploadResult) {
         data.profile_uri = uploadResult.secure_url;

@@ -62,7 +62,7 @@ export const errorHandler = (err, req, res, _next) => {
       data: null,
       errors: {
         name: err.name,
-        message: err.field,
+        message: err.message,
         validation: null,
       },
     });

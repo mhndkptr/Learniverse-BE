@@ -101,6 +101,7 @@ model CourseTransaction {
   payment_method    String?
   status            String?
   settlement_time   DateTime?
+  amount             Float?
   user_id           String
   course_id         String
 
@@ -109,6 +110,7 @@ model CourseTransaction {
 
   user              User             @relation(fields: [user_id], references: [id], onDelete: Cascade)
   course            Course           @relation(fields: [course_id], references: [id], onDelete: Cascade)
+  course_enrollment          CourseEnrollment?
 
   @@map("course_transactions")
 }
@@ -120,12 +122,14 @@ model CourseEnrollment {
   role            CourseEnrollmentRole
   user_id         String
   course_id       String
+  course_transaction_id       String?     @unique
 
   created_at      DateTime  @default(now())
   updated_at      DateTime  @updatedAt
 
-  user            User           @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  course          Course         @relation(fields: [course_id], references: [id], onDelete: Cascade)
+  user                        User           @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  course                      Course         @relation(fields: [course_id], references: [id], onDelete: Cascade)
+  course_transaction          CourseTransaction?         @relation(fields: [course_transaction_id], references: [id], onDelete: Cascade)
 
   @@map("course_enrollments")
 }

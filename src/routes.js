@@ -4,11 +4,15 @@ import courseRoutes from "./domains/v1/course/course-routes.js";
 import scheduleRoutes from "./domains/v1/schedule/schedule-routes.js";
 import quizRoutes from "./domains/v1/quiz/quiz-routes.js";
 import userRoutes from "./domains/v1/user/user-routes.js";
+import courseTransactionRoutes from "./domains/v1/course-transaction/course-transaction-routes.js";
+import courseEnrollmentRoutes from "./domains/v1/course-enrollment/course-enrollment-routes.js";
 
 const router = express.Router();
 
 const appsV1Routes = [
   { path: "/auth", route: authRoutes },
+  { path: "/course/transaction", route: courseTransactionRoutes },
+  { path: "/course/enrollment", route: courseEnrollmentRoutes },
   { path: "/course", route: courseRoutes },
   { path: "/schedule", route: scheduleRoutes },
   { path: "/quiz", route: quizRoutes },

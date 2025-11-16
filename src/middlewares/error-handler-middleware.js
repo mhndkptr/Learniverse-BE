@@ -1,3 +1,4 @@
+import { isAxiosError } from "axios";
 import BaseError from "../base-classes/base-error.js";
 import StatusCodes from "../errors/status-codes.js";
 
@@ -58,6 +59,39 @@ export const errorHandler = (err, req, res, _next) => {
       code: StatusCodes.BAD_REQUEST.code,
       status: StatusCodes.BAD_REQUEST.codeName,
       message: StatusCodes.BAD_REQUEST.message,
+      pagination: null,
+      data: null,
+      errors: {
+        name: err.name,
+        message: err.message,
+        validation: null,
+      },
+    });
+  }
+
+  if (err.name === "AxiosError") {
+    console.log("❌ Axios Error:", err);
+    console.log("❌ Axios Error Response Data:", err.response.data);
+
+    if (err?.response && err?.response?.data) {
+      return res.status(StatusCodes.BAD_GATEWAY.code).json({
+        code: StatusCodes.BAD_GATEWAY.code,
+        status: StatusCodes.BAD_GATEWAY.codeName,
+        message: StatusCodes.BAD_GATEWAY.message,
+        pagination: null,
+        data: null,
+        errors: {
+          name: err?.response?.data?.error?.name || err.name,
+          message: err?.response?.data?.error?.message || err.message,
+          validation: null,
+        },
+      });
+    }
+
+    return res.status(StatusCodes.BAD_GATEWAY.code).json({
+      code: StatusCodes.BAD_GATEWAY.code,
+      status: StatusCodes.BAD_GATEWAY.codeName,
+      message: StatusCodes.BAD_GATEWAY.message,
       pagination: null,
       data: null,
       errors: {

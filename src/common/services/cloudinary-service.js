@@ -1,8 +1,5 @@
-import dotenv from "dotenv";
 import { v2 as cloudinary } from "cloudinary";
 import BaseError from "../../base-classes/base-error.js";
-
-dotenv.config();
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,

@@ -6,8 +6,6 @@ const createCourseSchema = Joi.object({
   content: Joi.string().allow("", null).required(),
   code: Joi.string().alphanum().min(3).max(10).required(),
 
-  cover_uri: Joi.string().required(),
-
   price: Joi.number().min(0).precision(2).required(),
 
   is_open_registration_member: Joi.boolean().default(false),
@@ -22,14 +20,15 @@ const updateCourseSchema = Joi.object({
   content: Joi.string().allow("", null).optional(),
   code: Joi.string().alphanum().min(3).max(10).optional(),
 
-  cover_uri: Joi.string().optional(),
   price: Joi.number().min(0).precision(2).optional(),
 
   is_open_registration_member: Joi.boolean().optional(),
   is_open_registration_mentor: Joi.boolean().optional(),
-}).min(1).messages({
-  "object.min": "At least one field must be provided for update.",
-});
+})
+  .min(1)
+  .messages({
+    "object.min": "At least one field must be provided for update.",
+  });
 
 const getAllCourseParamsSchema = Joi.object({
   get_all: Joi.boolean().optional().default(false),
@@ -66,14 +65,9 @@ const getAllCourseParamsSchema = Joi.object({
   search: Joi.string().allow("", null).optional(),
 
   filter: Joi.object({
-
     is_open_registration_member: Joi.boolean().optional(),
-    is_open_registration_mentor: Joi.boolean().optional()
+    is_open_registration_mentor: Joi.boolean().optional(),
   }).optional(),
 });
 
-export {
-  createCourseSchema,
-  updateCourseSchema,
-  getAllCourseParamsSchema,
-};
+export { createCourseSchema, updateCourseSchema, getAllCourseParamsSchema };

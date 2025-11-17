@@ -9,10 +9,12 @@ import {
 } from "../../../utils/jwtTokenConfig.js";
 import { hashPassword } from "../../../utils/passwordConfig.js";
 import Role from "../../../common/enums/role-enum.js";
+import { CloudinaryService } from "../../../common/services/cloudinary-service.js";
 
 class AuthService {
   constructor() {
     this.prisma = new PrismaService();
+    this.cloudinary = new CloudinaryService();
     this.JWTConfig = jwtConfig();
   }
 
@@ -56,7 +58,7 @@ class AuthService {
     return { access_token: accessToken, refresh_token: refreshToken, user };
   }
 
-  async register(name, email, username, phone_number, password) {
+  async register({ name, email, username, phone_number, password }, file) {
     const emailExists = await this.prisma.user.findFirst({
       where: {
         email: email,
@@ -77,15 +79,27 @@ class AuthService {
       throw BaseError.badRequest("Username already taken");
     }
 
+    const data = {
+      name,
+      email,
+      username,
+      phone_number,
+      password: await hashPassword(password),
+      role: Role.STUDENT,
+    };
+
+    if (file) {
+      const uploadResult = await this.cloudinary.uploadFromBufferToCloudinary(
+        file.buffer,
+        "user/profile"
+      );
+      if (uploadResult) {
+        data.profile_uri = uploadResult.secure_url;
+      }
+    }
+
     const user = await this.prisma.user.create({
-      data: {
-        name,
-        email,
-        username,
-        phone_number,
-        password: await hashPassword(password),
-        role: Role.STUDENT,
-      },
+      data: data,
     });
 
     delete user.password;

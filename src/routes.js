@@ -7,6 +7,7 @@ import userRoutes from "./domains/v1/user/user-routes.js";
 import modulRoutes from "./domains/v1/modul/modul-routes.js";
 import courseEnrollmentRoutes from "./domains/v1/course/course-enrollment/course-enrollment-routes.js";
 import courseTransactionRoutes from "./domains/v1/course/course-transaction/course-transaction-routes.js";
+import mentorRoutes from "./domains/v1/mentor/mentor-routes.js";
 
 const router = express.Router();
 
@@ -18,7 +19,7 @@ const appsV1Routes = [
   { path: "/schedule", route: scheduleRoutes },
   { path: "/quiz", route: quizRoutes },
   { path: "/user", route: userRoutes },
-  { path: "/schedule", route: scheduleRoutes }, 
+  { path: "/mentor", route: mentorRoutes },
   { path: "/modul", route: modulRoutes },
 ];
 

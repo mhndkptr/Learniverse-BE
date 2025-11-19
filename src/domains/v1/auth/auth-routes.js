@@ -21,7 +21,7 @@ class AuthRoutes extends BaseRoutes {
       tryCatch(authController.register)
     );
 
-    this.router.post("/refresh-token", [tryCatch(authController.refreshToken)]);
+    this.router.post("/refresh-token", tryCatch(authController.refreshToken));
 
     this.router.get("/me", [
       authTokenMiddleware.authenticate,

@@ -64,4 +64,18 @@ class ExpressApplication {
   }
 }
 
-export default ExpressApplication;
+const appInstance = new ExpressApplication(process.env.APP_PORT || 3000);
+const app = appInstance.app;
+
+if (process.env.NODE_ENV !== "cli" && process.env.NODE_ENV !== "production") {
+  const server = appInstance.start();
+
+  process.on("SIGTERM", () => {
+    logger.warn("SIGTERM RECEIVED!");
+    server.close(() => {
+      logger.warn("Process Terminated!");
+    });
+  });
+}
+
+export default app;

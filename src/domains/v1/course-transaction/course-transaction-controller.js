@@ -26,8 +26,6 @@ class CourseTransactionController {
 
     const value = req.body;
 
-    console.log("Notify Body:", value);
-
     await CourseTransactionService.notify(value);
 
     return successResponse(

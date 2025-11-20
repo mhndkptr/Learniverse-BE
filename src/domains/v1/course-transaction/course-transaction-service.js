@@ -71,53 +71,35 @@ class CourseTransactionService {
     const shortUuid = courseTransaction.id.replace(/-/g, "").substring(0, 18);
     const timestampSeconds = Math.floor(Date.now() / 1000);
 
-    // const checkoutBody = {
-    //   order: {
-    //     amount: Number(courseExist.price),
-    //     invoice_number: `${shortUuid}${timestampSeconds}`,
-    // currency: process.env.DOKU_CURRENCY || "IDR",
-    // callback_url: "http://merchantcallbackurl.domain/",
-    // callback_url_cancel: "https://merchantcallbackurl-cancel.domain",
-    // callback_url_result: "https://merchantcallbackurl-cancel.domain",
-    // language: "EN",
-    // auto_redirect: true,
-    // disable_retry_payment: true,
-    // line_items: [
-    //   {
-    //     id: courseExist.id,
-    //     name: courseExist.title,
-    //     quantity: 1,
-    //     price: Number(courseExist.price),
-    //     sku: `LRNCRS-${courseExist.id}`,
-    //     category: "others",
-    //     url: `${process.env.APP_FRONTEND_URL}/course/${courseExist.id}`,
-    //     image_url: courseExist.cover_uri,
-    //     type: "COURSE",
-    //   },
-    // ],
-    // },
-    // payment: {
-    //   payment_due_date: Number(process.env.DOKU_PAYMENT_DUE_MINUTES) || 60,
-    //   type: "SALE",
-    // payment_method_types: [...Object.values(PaymentMethodType)],
-    // },
-    // customer: {
-    //   id: userExist.id,
-    //   name: userExist.name,
-    // },
-    // };
-
     const checkoutBody = {
       order: {
         amount: Number(courseExist.price),
         invoice_number: `${shortUuid}${timestampSeconds}`,
-        currency: "IDR",
+        currency: process.env.DOKU_CURRENCY || "IDR",
         callback_url: "http://merchantcallbackurl.domain/",
         callback_url_cancel: "https://merchantcallbackurl-cancel.domain",
+        callback_url_result: "https://merchantcallbackurl-cancel.domain",
+        language: "EN",
+        auto_redirect: true,
+        disable_retry_payment: true,
+        line_items: [
+          {
+            id: courseExist.id,
+            name: courseExist.title,
+            quantity: 1,
+            price: Number(courseExist.price),
+            sku: `LRNCRS-${courseExist.id}`,
+            category: "others",
+            url: `${process.env.APP_FRONTEND_URL}/course/${courseExist.id}`,
+            image_url: courseExist.cover_uri,
+            type: "COURSE",
+          },
+        ],
       },
       payment: {
-        payment_due_date: 60,
-        payment_method_types: ["QRIS"],
+        payment_due_date: Number(process.env.DOKU_PAYMENT_DUE_MINUTES) || 60,
+        type: "SALE",
+        payment_method_types: [...Object.values(PaymentMethodType)],
       },
       customer: {
         id: userExist.id,
@@ -127,34 +109,24 @@ class CourseTransactionService {
 
     const jsonCheckoutBody = JSON.stringify(checkoutBody);
 
+    const isoString = new Date().toISOString();
+    const dotIndex = isoString.indexOf(".");
+    const dokuTimestamp = isoString.substring(0, dotIndex) + "Z";
+
     const headers = buildDokuHeaders({
       body: checkoutBody,
       requestId: courseTransaction.id,
-      requestTimestamp: new Date().toISOString(),
+      requestTimestamp: dokuTimestamp,
       requestTarget: "/checkout/v1/payment",
     });
 
-    // const checkoutResponse = await axios.post(
-    //   `${process.env.DOKU_API_URL}/checkout/v1/payment`,
-    //   jsonCheckoutBody,
-    //   {
-    //     headers: headers,
-    //   }
-    // );
-
-    const checkoutResponse = await fetch(
+    const checkoutResponse = await axios.post(
       `${process.env.DOKU_API_URL}/checkout/v1/payment`,
+      jsonCheckoutBody,
       {
-        method: "POST",
         headers: headers,
-        body: jsonCheckoutBody,
       }
     );
-
-    console.log(headers);
-    console.log(jsonCheckoutBody);
-
-    console.log(checkoutResponse);
 
     if (checkoutResponse.status !== 200) {
       throw BaseError.badGateway(

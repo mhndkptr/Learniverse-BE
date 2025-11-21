@@ -8,6 +8,9 @@ import CourseEnrollmentRole from "../../../../common/enums/course-enrollment-rol
 import CourseTransactionStatus from "../../../../common/enums/course-transaction-status-enum.js";
 import { format } from "date-fns";
 import crypto from "crypto";
+import Role from "../../../../common/enums/role-enum.js";
+import { buildQueryOptions } from "../../../../utils/buildQueryOptions.js";
+import courseTransactionQueryConfig from "./course-transaction-query-config.js";
 
 class CourseTransactionService {
   constructor() {
@@ -16,14 +19,14 @@ class CourseTransactionService {
     this.CourseEnrollmentService = CourseEnrollmentService;
   }
 
-  async getAll() {
-    return this.prisma.courseTransaction.findMany({
-      include: {
-        course_enrollment: true,
-        course: true,
-        user: true,
-      },
-    });
+  async getAll(query, user) {
+    const options = buildQueryOptions(courseTransactionQueryConfig, query);
+
+    if (user.role === Role.STUDENT) {
+      options.where.user_id = user.id;
+    }
+
+    return this.prisma.courseTransaction.findMany(options);
   }
 
   async create(value) {

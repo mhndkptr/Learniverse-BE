@@ -7,7 +7,10 @@ import CourseTransactionService from "./course-transaction-service.js";
 
 class CourseTransactionController {
   async getAll(req, res) {
-    const data = await CourseTransactionService.getAll();
+    const data = await CourseTransactionService.getAll(
+      req.validatedQuery,
+      req.user
+    );
 
     return successResponse(
       res,

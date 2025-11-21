@@ -4,14 +4,18 @@ import authTokenMiddleware from "../../../../middlewares/auth-token-middleware.j
 import validateCredentials from "../../../../middlewares/validate-credentials-middleware.js";
 import tryCatch from "../../../../utils/tryCatcher.js";
 import courseTransactionController from "./course-transaction-controller.js";
-import { createCourseTransactionSchema } from "./course-transaction-schema.js";
+import {
+  createCourseTransactionSchema,
+  getAllCourseTransactionParamsSchema,
+} from "./course-transaction-schema.js";
+import validateQueryParamsCredentials from "../../../../middlewares/validate-query-params-credentials-middleware.js";
 
 class CourseTransactionRoutes extends BaseRoutes {
   routes() {
     this.router.get(
       "/",
       authTokenMiddleware.authenticate,
-      authTokenMiddleware.authorizeRoles([Role.ADMIN]),
+      validateQueryParamsCredentials(getAllCourseTransactionParamsSchema),
       tryCatch(courseTransactionController.getAll)
     );
 

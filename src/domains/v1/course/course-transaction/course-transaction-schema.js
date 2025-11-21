@@ -13,4 +13,28 @@ const createCourseTransactionSchema = Joi.object({
   }),
 });
 
-export { createCourseTransactionSchema };
+const getAllCourseTransactionParamsSchema = Joi.object({
+  order_by: Joi.array()
+    .items(
+      Joi.object({
+        field: Joi.string()
+          .valid("status", "created_at", "updated_at")
+          .required(),
+        direction: Joi.string().valid("asc", "desc").default("asc"),
+      })
+    )
+    .optional(),
+
+  include_relation: Joi.array()
+    .items(Joi.string().valid("course_enrollment", "course", "user"))
+    .optional(),
+
+  filter: Joi.object({
+    status: Joi.string(),
+    user_id: Joi.string().uuid(),
+    course_id: Joi.string().uuid(),
+    course_enrollment_id: Joi.string().uuid(),
+  }).optional(),
+});
+
+export { createCourseTransactionSchema, getAllCourseTransactionParamsSchema };

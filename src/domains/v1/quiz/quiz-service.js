@@ -3,6 +3,7 @@ import { PrismaService } from "../../../common/services/prisma-service.js";
 import { buildQueryOptions } from "../../../utils/buildQueryOptions.js";
 import BaseError from "../../../base-classes/base-error.js";
 import QuizType from "../../../common/enums/quiz-enum.js";
+import quizQueryConfig from "./quiz-query-config.js";
 
 class QuizService {
   constructor() {
@@ -10,7 +11,7 @@ class QuizService {
   }
 
   async getAll(query) {
-    const options = buildQueryOptions(QuizQueryConfig, query);
+    const options = buildQueryOptions(quizQueryConfig, query);
 
     if (query.advSearch?.quiz_id) {
       if (!options.where) {

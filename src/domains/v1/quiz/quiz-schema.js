@@ -65,15 +65,6 @@ const createQuizSchema = Joi.object({
 
   description: Joi.string().allow(null, ""),
 
-  type: Joi.string()
-    .valid(QuizType.PUBLISH, QuizType.DRAFT)
-    .required()
-    .messages({
-      "any.only": `Type must be one of: ${Object.values(QuizType).join(", ")}`,
-      "string.empty": "Quiz type is required.",
-      "any.required": "Quiz type is required.",
-    }),
-
   start_date: Joi.date().iso().required().messages({
     "any.required": "Start date is required.",
     "date.format": "Start date must be in ISO 8601 format.",
@@ -112,15 +103,15 @@ const updateQuizSchema = Joi.object({
     "string.max": "Quiz title cannot exceed 100 characters.",
   }),
 
-  identifier: Joi.string().allow(null, ""),
-
   description: Joi.string().allow(null, ""),
 
-  type: Joi.string()
-    .valid(QuizType.PUBLISH, QuizType.DRAFT)
+  status: Joi.string()
+    .valid("PUBLISH", "DRAFT")
     .messages({
-      "any.only": `Type must be one of: ${Object.values(QuizType).join(", ")}`,
+      "any.only": "Status must be one of: PUBLISH, DRAFT",
     }),
+
+  show_review: Joi.boolean().optional(),
 
   start_date: Joi.date().iso().messages({
     "date.format": "Start date must be in ISO 8601 format.",
@@ -130,23 +121,18 @@ const updateQuizSchema = Joi.object({
     "date.format": "End date must be in ISO 8601 format.",
   }),
 
-  Quiz: Joi.any()
-    .when("type", {
-      is: QuizType.PUBLISH,
-      then: Joi.forbidden().messages({
-        "any.forbidden": "Quiz object is not allowed when type is PUBLISH",
-      }),
-    })
-    .when("type", {
-      is: QuizType.DRAFT,
-      then: QuizSchema.required().messages({
-        "any.required": "Quiz object is required when type is DRAFT",
-      }),
-    })
-    .when("type", {
-      is: Joi.not(Joi.exist()),
-      then: Joi.optional(),
-    }),
+  max_attempt: Joi.number().integer().min(1).messages({
+    "number.min": "Max attempt must be at least 1.",
+  }),
+
+  duration: Joi.number().integer().min(0).messages({
+    "number.min": "Duration must be at least 0.",
+  }),
+
+  course_id: Joi.string().uuid().messages({
+    "string.uuid": "Course ID must be a valid UUID.",
+  }),
+  
 })
   .min(1)
   .messages({

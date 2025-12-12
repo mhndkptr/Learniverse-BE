@@ -82,7 +82,7 @@ export class CloudinaryService {
       const result = await this.cloudinary.uploader.destroy(publicIds);
       return result;
     } catch (error) {
-      throw BaseError.badGateway("Cloudinary", "Failed to delete file.");
+      // throw BaseError.badGateway("Cloudinary", "Failed to delete file.");
     }
   }
 

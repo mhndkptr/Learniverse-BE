@@ -5,7 +5,12 @@ import ModulService from "./modul-service.js";
 class ModulController {
   async getAll(req, res) {
     const data = await ModulService.getAll();
-    return successResponse(res, data.data, "All moduls retrieved successfully",data.meta);
+    return successResponse(
+      res,
+      data.data,
+      "All moduls retrieved successfully",
+      data.meta
+    );
   }
 
   async getById(req, res) {
@@ -29,15 +34,22 @@ class ModulController {
       throw BaseError.badRequest("Request body is missing");
     }
 
+    if (!req.file) {
+      throw BaseError.badRequest("No file uploaded");
+    }
+
     const { title, description, file_name, modul_uri, course_id } = req.body;
 
-    const data = await ModulService.create({
-      title,
-      description,
-      file_name,
-      modul_uri,
-      course_id,
-    });
+    const data = await ModulService.create(
+      {
+        title,
+        description,
+        file_name,
+        modul_uri,
+        course_id,
+      },
+      req.file
+    );
 
     return createdResponse(res, data, "Modul created successfully");
   }
@@ -53,7 +65,7 @@ class ModulController {
       throw BaseError.badRequest("Request body is missing");
     }
 
-    const data = await ModulService.update(id, req.body);
+    const data = await ModulService.update(id, req.body, req.file);
 
     return successResponse(res, data, "Modul updated successfully");
   }

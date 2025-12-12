@@ -14,6 +14,13 @@ const createCourseTransactionSchema = Joi.object({
 });
 
 const getAllCourseTransactionParamsSchema = Joi.object({
+  get_all: Joi.boolean().optional().default(false),
+
+  pagination: Joi.object({
+    page: Joi.number().integer().min(1).default(1),
+    limit: Joi.number().integer().min(1).max(100).default(10),
+  }).optional(),
+
   order_by: Joi.array()
     .items(
       Joi.object({
@@ -28,6 +35,8 @@ const getAllCourseTransactionParamsSchema = Joi.object({
   include_relation: Joi.array()
     .items(Joi.string().valid("course_enrollment", "course", "user"))
     .optional(),
+
+  search: Joi.string().allow("", null).optional(),
 
   filter: Joi.object({
     status: Joi.string(),

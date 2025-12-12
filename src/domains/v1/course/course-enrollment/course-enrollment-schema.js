@@ -20,4 +20,35 @@ const createCourseEnrollmentSchema = Joi.object({
     }),
 });
 
-export { createCourseEnrollmentSchema };
+const getAllCourseEnrollmentParamsSchema = Joi.object({
+  get_all: Joi.boolean().optional().default(false),
+
+  pagination: Joi.object({
+    page: Joi.number().integer().min(1).default(1),
+    limit: Joi.number().integer().min(1).max(100).default(10),
+  }).optional(),
+
+  order_by: Joi.array()
+    .items(
+      Joi.object({
+        field: Joi.string().valid("created_at", "updated_at").required(),
+        direction: Joi.string().valid("asc", "desc").default("asc"),
+      })
+    )
+    .optional(),
+
+  include_relation: Joi.array()
+    .items(Joi.string().valid("course_transaction", "course", "user"))
+    .optional(),
+
+  search: Joi.string().allow("", null).optional(),
+
+  filter: Joi.object({
+    role: Joi.string().valid(...Object.values(CourseEnrollmentRole)),
+    user_id: Joi.string().uuid(),
+    course_id: Joi.string().uuid(),
+    course_transaction_id: Joi.string().uuid(),
+  }).optional(),
+});
+
+export { createCourseEnrollmentSchema, getAllCourseEnrollmentParamsSchema };

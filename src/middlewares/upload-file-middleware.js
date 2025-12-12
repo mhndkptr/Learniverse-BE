@@ -9,7 +9,8 @@ const __dirname = dirname(__filename);
 // Daftar mime types untuk berbagai tipe file
 const mimeTypes = {
   image: /jpeg|jpg|png|webp/,
-  document: /pdf|doc|docx|xls|xlsx|ppt|pptx|csv/,
+  // document: /pdf|doc|docx|xls|xlsx|ppt|pptx|csv/,
+  document: /pdf/,
   all: /.*/, // jika ingin mengizinkan semua
 };
 

@@ -26,7 +26,27 @@ class CourseTransactionService {
       options.where.user_id = user.id;
     }
 
-    return this.prisma.courseTransaction.findMany(options);
+    const [data, count] = await Promise.all([
+      this.prisma.courseTransaction.findMany(options),
+      this.prisma.courseTransaction.count({ where: options.where }),
+    ]);
+
+    const page = query?.pagination?.page ?? 1;
+    const limit = query?.pagination?.limit ?? 10;
+    const totalPages = Math.ceil(count / limit);
+
+    return {
+      data,
+      meta:
+        query?.pagination?.page && query?.pagination?.limit
+          ? {
+              totalItems: count,
+              totalPages,
+              currentPage: page,
+              itemsPerPage: limit,
+            }
+          : null,
+    };
   }
 
   async create(value) {

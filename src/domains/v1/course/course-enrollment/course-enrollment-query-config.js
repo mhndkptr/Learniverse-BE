@@ -4,6 +4,7 @@ const courseEnrollmentQueryConfig = {
   relations: {
     user: true,
     course: true,
+    course_transaction: true,
   },
   hasSoftDelete: false,
   omit: {},

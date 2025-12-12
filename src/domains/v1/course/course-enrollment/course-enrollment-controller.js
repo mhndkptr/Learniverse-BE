@@ -7,12 +7,16 @@ import CourseEnrollmentService from "./course-enrollment-service.js";
 
 class CourseEnrollmentController {
   async getAll(req, res) {
-    const data = await CourseEnrollmentService.getAll(req.user);
+    const data = await CourseEnrollmentService.getAll(
+      req.validatedQuery,
+      req.user
+    );
 
     return successResponse(
       res,
-      data,
-      "Course enrollments retrieved successfully"
+      data.data,
+      "Course enrollments retrieved successfully",
+      data.meta
     );
   }
 

@@ -14,8 +14,9 @@ class CourseTransactionController {
 
     return successResponse(
       res,
-      data,
-      "Course transactions retrieved successfully"
+      data.data,
+      "Course transactions retrieved successfully",
+      data.meta
     );
   }
 

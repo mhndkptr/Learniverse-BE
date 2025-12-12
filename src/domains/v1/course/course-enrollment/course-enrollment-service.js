@@ -1,30 +1,43 @@
 import BaseError from "../../../../base-classes/base-error.js";
 import Role from "../../../../common/enums/role-enum.js";
 import { PrismaService } from "../../../../common/services/prisma-service.js";
+import { buildQueryOptions } from "../../../../utils/buildQueryOptions.js";
 import Joi from "joi";
+import courseEnrollmentQueryConfig from "./course-enrollment-query-config.js";
 
 class CourseEnrollmentService {
   constructor() {
     this.prisma = new PrismaService();
   }
 
-  async getAll(user) {
-    const query = {};
+  async getAll(query, user) {
+    const options = buildQueryOptions(courseEnrollmentQueryConfig, query);
 
     if (user.role === Role.STUDENT) {
-      query.user_id = user.id;
+      options.where.user_id = user.id;
     }
 
-    const courseEnrollments = await this.prisma.courseEnrollment.findMany({
-      where: query,
-      include: {
-        course: true,
-        user: true,
-        course_transaction: true,
-      },
-    });
+    const [data, count] = await Promise.all([
+      this.prisma.courseEnrollment.findMany(options),
+      this.prisma.courseEnrollment.count({ where: options.where }),
+    ]);
 
-    return courseEnrollments;
+    const page = query?.pagination?.page ?? 1;
+    const limit = query?.pagination?.limit ?? 10;
+    const totalPages = Math.ceil(count / limit);
+
+    return {
+      data,
+      meta:
+        query?.pagination?.page && query?.pagination?.limit
+          ? {
+              totalItems: count,
+              totalPages,
+              currentPage: page,
+              itemsPerPage: limit,
+            }
+          : null,
+    };
   }
 
   async create(value) {

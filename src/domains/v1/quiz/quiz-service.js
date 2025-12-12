@@ -4,6 +4,7 @@ import { buildQueryOptions } from "../../../utils/buildQueryOptions.js";
 import BaseError from "../../../base-classes/base-error.js";
 import QuizType from "../../../common/enums/quiz-enum.js";
 import quizQueryConfig from "./quiz-query-config.js";
+import ScheduleService from "../schedule/schedule-service.js";
 
 class QuizService {
   constructor() {
@@ -28,8 +29,8 @@ class QuizService {
       this.prisma.Quiz.findMany({
         ...options,
         include: {
-          course: true
-        }
+          course: true,
+        },
       }),
       this.prisma.Quiz.count({
         where: options.where,
@@ -74,19 +75,27 @@ class QuizService {
       });
 
       if (!courseExists) {
-        throw new Joi.ValidationError("Course not found", [{
-          message: "Course not found",
-          path: ["course_id"],
-        }]);
+        throw new Joi.ValidationError("Course not found", [
+          {
+            message: "Course not found",
+            path: ["course_id"],
+          },
+        ]);
       }
     }
 
     if (value.type === QuizType.PUBLISH) {
       if (!value.start_date || !value.end_date) {
-        throw new Joi.ValidationError("Published quiz must have start and end date", [{
-          message: "Start date and end date are required for published quiz",
-          path: ["start_date", "end_date"],
-        }]);
+        throw new Joi.ValidationError(
+          "Published quiz must have start and end date",
+          [
+            {
+              message:
+                "Start date and end date are required for published quiz",
+              path: ["start_date", "end_date"],
+            },
+          ]
+        );
       }
     }
 
@@ -105,8 +114,38 @@ class QuizService {
       },
       include: {
         course: true,
-      }
+      },
     });
+
+    // update
+    if (value.end_date && value.course_id) {
+      try {
+        const referenceDate = new Date(value.end_date);
+
+        // Set Start Time
+        const startTime = new Date(referenceDate);
+        startTime.setHours(0, 0, 0, 0);
+
+        // Set End Time
+        const endTime = referenceDate;
+
+        const schedulePayload = {
+          title: `Due: ${value.title}`,
+          description: `Deadline for Quiz: ${value.title}`,
+          course_id: value.course_id,
+          start_time: startTime.toISOString(),
+          end_time: endTime.toISOString(),
+        };
+
+
+        await ScheduleService.create(schedulePayload, user);
+      } catch (error) {
+        console.error(
+          "[WARN] Failed to auto-create schedule for quiz:",
+          error.message
+        );
+      }
+    }
 
     return data;
   }
@@ -116,7 +155,7 @@ class QuizService {
       where: { id },
       include: {
         course: true,
-      }
+      },
     });
 
     if (!quiz) throw BaseError.notFound("Quiz not found.");
@@ -127,19 +166,30 @@ class QuizService {
       });
 
       if (!courseExists) {
-        throw new Joi.ValidationError("Course not found", [{
-          message: "Course not found",
-          path: ["course_id"],
-        }]);
+        throw new Joi.ValidationError("Course not found", [
+          {
+            message: "Course not found",
+            path: ["course_id"],
+          },
+        ]);
       }
     }
 
     if (value.type === QuizType.PUBLISH) {
-      if (!quiz.start_date && !value.start_date || !quiz.end_date && !value.end_date) {
-        throw new Joi.ValidationError("Published quiz must have start and end date", [{
-          message: "Start date and end date are required for published quiz",
-          path: ["start_date", "end_date"],
-        }]);
+      if (
+        (!quiz.start_date && !value.start_date) ||
+        (!quiz.end_date && !value.end_date)
+      ) {
+        throw new Joi.ValidationError(
+          "Published quiz must have start and end date",
+          [
+            {
+              message:
+                "Start date and end date are required for published quiz",
+              path: ["start_date", "end_date"],
+            },
+          ]
+        );
       }
     }
 
@@ -148,7 +198,7 @@ class QuizService {
       data: value,
       include: {
         course: true,
-      }
+      },
     });
 
     return updatedQuiz;
@@ -159,7 +209,7 @@ class QuizService {
       where: { id },
       include: {
         course: true,
-      }
+      },
     });
 
     if (!quiz) throw BaseError.notFound("Quiz not found.");

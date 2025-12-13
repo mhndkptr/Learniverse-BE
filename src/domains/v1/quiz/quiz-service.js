@@ -60,6 +60,11 @@ class QuizService {
       where: { id },
       include: {
         course: true,
+        quiz_questions: {
+          include: {
+            quiz_option_answers: true,
+          },
+        },
       },
     });
 

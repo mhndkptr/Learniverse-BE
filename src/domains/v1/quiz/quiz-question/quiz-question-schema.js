@@ -27,7 +27,9 @@ const getAllQuizQuestionParamsSchema = Joi.object({
   advSearch: Joi.object({
     quiz_id: Joi.string().uuid().optional(),
     question: Joi.string().optional(),
-    type: Joi.string().valid(...Object.values(QuizQuestionType)).optional(),
+    type: Joi.string()
+      .valid(...Object.values(QuizQuestionType))
+      .optional(),
   }).optional(),
 
   include_relation: Joi.array()
@@ -42,7 +44,9 @@ const getAllQuizQuestionParamsSchema = Joi.object({
 
   filter: Joi.object({
     quiz_id: Joi.string().uuid().optional(),
-    type: Joi.string().valid(...Object.values(QuizQuestionType)).optional(),
+    type: Joi.string()
+      .valid(...Object.values(QuizQuestionType))
+      .optional(),
     question: Joi.string().optional(),
   }).optional(),
 });
@@ -52,8 +56,6 @@ const QuizOptionAnswerSchema = Joi.object({
     "string.empty": "Answer text is required.",
     "any.required": "Answer text is required.",
   }),
-
-  image_uri: Joi.string().uri().optional(),
 
   is_correct: Joi.boolean().required().messages({
     "any.required": "is_correct flag is required for option answers.",
@@ -76,7 +78,9 @@ const createQuizQuestionSchema = Joi.object({
     .valid(...Object.values(QuizQuestionType))
     .required()
     .messages({
-      "any.only": `Type must be one of: ${Object.values(QuizQuestionType).join(", ")}`,
+      "any.only": `Type must be one of: ${Object.values(QuizQuestionType).join(
+        ", "
+      )}`,
       "any.required": "Question type is required.",
     }),
 
@@ -92,7 +96,9 @@ const updateQuizQuestionSchema = Joi.object({
     .valid(...Object.values(QuizQuestionType))
     .optional()
     .messages({
-      "any.only": `Type must be one of: ${Object.values(QuizQuestionType).join(", ")}`,
+      "any.only": `Type must be one of: ${Object.values(QuizQuestionType).join(
+        ", "
+      )}`,
     }),
 
   image_uri: Joi.string().uri().allow(null).optional(),

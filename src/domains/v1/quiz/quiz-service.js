@@ -60,6 +60,11 @@ class QuizService {
       where: { id },
       include: {
         course: true,
+        quiz_questions: {
+          include: {
+            quiz_option_answers: true,
+          },
+        },
       },
     });
 
@@ -136,7 +141,6 @@ class QuizService {
           start_time: startTime.toISOString(),
           end_time: endTime.toISOString(),
         };
-
 
         await ScheduleService.create(schedulePayload, user);
       } catch (error) {

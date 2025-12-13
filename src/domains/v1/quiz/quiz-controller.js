@@ -14,6 +14,17 @@ class QuizController {
     );
   }
 
+  async getAllForStudent(req, res) {
+    const quiz = await QuizService.getAllForStudent(req.user);
+
+    return successResponse(
+      res,
+      quiz.data,
+      "Active quiz data retrieved successfully",
+      quiz.meta
+    );
+  }
+
   async getById(req, res) {
     const { id } = req.params;
 

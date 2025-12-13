@@ -110,7 +110,14 @@ class CourseService {
 
     if (file) {
       if (exist.cover_uri != null) {
-        await this.cloudinary.deleteFromUrlsCloudinary([exist.cover_uri]);
+        try {
+          await this.cloudinary.deleteFromUrlsCloudinary([exist.cover_uri]);
+        } catch (error) {
+          console.warn(
+            "Gagal menghapus gambar lama (mungkin bukan file Cloudinary), lanjut update...",
+            error.message
+          );
+        }
       }
 
       const uploadResult = await this.cloudinary.uploadFromBufferToCloudinary(
@@ -131,7 +138,14 @@ class CourseService {
     if (!exist) throw BaseError.notFound("Course not found.");
 
     if (exist.cover_uri != null) {
-      await this.cloudinary.deleteFromUrlsCloudinary([exist.cover_uri]);
+      try {
+        await this.cloudinary.deleteFromUrlsCloudinary([exist.cover_uri]);
+      } catch (error) {
+        console.warn(
+          "Gagal menghapus gambar lama saat delete course, lanjut delete data...",
+          error.message
+        );
+      }
     }
 
     const deleted = await this.prisma.course.delete({ where: { id } });

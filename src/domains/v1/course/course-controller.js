@@ -25,7 +25,7 @@ class CourseController {
 
     const payload = { ...req.body };
 
-    if (payload.price) {
+    if ("price" in payload) {
       payload.price = parseFloat(payload.price);
     }
 
@@ -45,7 +45,7 @@ class CourseController {
 
     const payload = { ...req.body };
 
-    if (payload.price) {
+    if ("price" in payload) {
       payload.price = parseFloat(payload.price);
     }
 

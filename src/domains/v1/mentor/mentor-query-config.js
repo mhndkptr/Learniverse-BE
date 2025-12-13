@@ -1,20 +1,17 @@
 const mentorQueryConfig = {
-  // Field yang bisa digunakan untuk pencarian (search)
-  searchableFields: ["bio", "reason", "motivation"],
+  searchableFields: ["bio", "reason", "motivation", "user.name", "user.email"],
 
-  // Field yang bisa digunakan untuk filtering
   filterableFields: ["status", "user_id", "course_id"],
 
-  // Relasi antar model untuk include di Prisma query
   relations: {
     user: {
       include: {
-        mentors: true, // agar bisa melihat semua mentor milik user tersebut
+        mentors: true,
       },
     },
     course: {
       include: {
-        mentors: true, // agar bisa melihat semua mentor dari course tersebut
+        mentors: true,
       },
     },
   },

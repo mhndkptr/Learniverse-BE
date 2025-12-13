@@ -55,6 +55,42 @@ class QuizService {
     };
   }
 
+  async getAllForStudent(user) {
+    const data = await this.prisma.quiz.findMany({
+      where: {
+        status: "PUBLISH",
+        end_date: {
+          gt: new Date(),
+        },
+        course: {
+          course_enrollments: {
+            some: {
+              user_id: user.id,
+              role: "MEMBER",
+            },
+          },
+        },
+
+        quiz_attempts: {
+          none: {
+            user_id: user.id,
+          },
+        },
+      },
+      include: {
+        course: true,
+      },
+      orderBy: {
+        end_date: "asc",
+      },
+    });
+
+    return {
+      data,
+      meta: null,
+    };
+  }
+
   async getById(id) {
     const data = await this.prisma.Quiz.findFirst({
       where: { id },

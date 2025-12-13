@@ -13,6 +13,16 @@ class CourseController {
     );
   }
 
+  async getAllMe(req, res) {
+    const result = await CourseService.getAllMe(req.user);
+    return successResponse(
+      res,
+      result.data,
+      "Enrolled courses retrieved successfully",
+      result.meta
+    );
+  }
+
   async getById(req, res) {
     const { id } = req.params;
     const data = await CourseService.getById(id);

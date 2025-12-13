@@ -54,6 +54,33 @@ class CourseService {
     };
   }
 
+  async getAllMe(user) {
+    const data = await this.prisma.course.findMany({
+      where: {
+        course_enrollments: {
+          some: {
+            user_id: user.id,
+            role: {
+              in: ["MEMBER", "MENTOR"],
+            },
+          },
+        },
+      },
+      include: {
+        course_enrollments: {
+          where: {
+            user_id: user.id,
+          },
+        },
+      },
+    });
+
+    return {
+      data,
+      meta: null,
+    };
+  }
+
   async getById(id) {
     const data = await this.prisma.course.findFirst({
       where: { id },

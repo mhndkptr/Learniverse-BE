@@ -1,4 +1,5 @@
 import BaseRoutes from "../../../base-classes/base-routes.js";
+import Role from "../../../common/enums/role-enum.js";
 import authMiddleware from "../../../middlewares/auth-token-middleware.js";
 import uploadFile from "../../../middlewares/upload-file-middleware.js";
 import validateCredentials from "../../../middlewares/validate-credentials-middleware.js";
@@ -16,6 +17,12 @@ class CourseRoutes extends BaseRoutes {
     this.router.get("/", [
       validateQueryParamsCredentials(getAllCourseParamsSchema),
       tryCatch(CourseController.getAll),
+    ]);
+
+    this.router.get("/me", [
+      authMiddleware.authenticate,
+      authMiddleware.authorizeRoles([Role.STUDENT]),
+      tryCatch(CourseController.getAllMe),
     ]);
 
     this.router.get("/:id", [tryCatch(CourseController.getById)]);

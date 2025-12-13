@@ -15,6 +15,7 @@ import {
   updateQuizSchema,
   getAllQuizParamsSchema,
 } from "./quiz-schema.js";
+import Role from "../../../common/enums/role-enum.js";
 
 class QuizRoutes extends BaseRoutes {
   routes() {
@@ -22,6 +23,11 @@ class QuizRoutes extends BaseRoutes {
       authTokenMiddleware.authenticate,
       validateQueryParamsCredentials(getAllQuizParamsSchema),
       tryCatch(QuizController.getAll),
+    ]);
+    this.router.get("/me/active", [
+      authTokenMiddleware.authenticate,
+      authTokenMiddleware.authorizeRoles([Role.STUDENT]),
+      tryCatch(QuizController.getAllForStudent),
     ]);
     this.router.use("/question", QuizQuestionRoutes);
     this.router.use("/attempt", QuizAttemptRoutes);

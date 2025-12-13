@@ -67,7 +67,9 @@ class QuizQuestionService {
 
   async create(value, user) {
     // validate parent quiz exists
-    const quizExists = await this.prisma.Quiz.findUnique({ where: { id: value.quiz_id } });
+    const quizExists = await this.prisma.Quiz.findUnique({
+      where: { id: value.quiz_id },
+    });
     if (!quizExists) {
       throw new Joi.ValidationError("Quiz not found", [
         { message: "Quiz not found", path: ["quiz_id"] },
@@ -76,18 +78,20 @@ class QuizQuestionService {
 
     // Use a transaction for create to be explicit and consistent
     const data = await this.prisma.$transaction(async (tx) => {
-      const created = await tx.QuizQuestion.create({
+      const created = await tx.quizQuestion.create({
         data: {
           question: value.question,
           type: value.type,
           image_uri: value.image_uri || null,
           quiz_id: value.quiz_id,
           quiz_option_answers: value.quiz_option_answers
-            ? { create: value.quiz_option_answers.map((opt) => ({
-                answer: opt.answer,
-                image_uri: opt.image_uri || null,
-                is_correct: !!opt.is_correct,
-              })) }
+            ? {
+                create: value.quiz_option_answers.map((opt) => ({
+                  answer: opt.answer,
+                  image_uri: opt.image_uri || null,
+                  is_correct: !!opt.is_correct,
+                })),
+              }
             : undefined,
         },
         include: {
@@ -102,7 +106,7 @@ class QuizQuestionService {
   }
 
   async update(id, value, user) {
-    const quizQuestion = await this.prisma.QuizQuestion.findUnique({
+    const quizQuestion = await this.prisma.quizQuestion.findUnique({
       where: { id },
       include: { quiz_option_answers: true },
     });
@@ -112,7 +116,9 @@ class QuizQuestionService {
     // perform update and option answers replacement in a transaction
     const updated = await this.prisma.$transaction(async (tx) => {
       if (value.quiz_option_answers) {
-        await tx.QuizOptionAnswer.deleteMany({ where: { quiz_question_id: id } });
+        await tx.QuizOptionAnswer.deleteMany({
+          where: { quiz_question_id: id },
+        });
         // use createMany without client-supplied id so prisma generates ids
         await tx.QuizOptionAnswer.createMany({
           data: value.quiz_option_answers.map((opt) => ({
@@ -124,7 +130,7 @@ class QuizQuestionService {
         });
       }
 
-      const upd = await tx.QuizQuestion.update({
+      const upd = await tx.quizQuestion.update({
         where: { id },
         data: {
           question: value.question,
@@ -143,12 +149,13 @@ class QuizQuestionService {
   }
 
   async delete(id, user) {
-    const quizQuestion = await this.prisma.QuizQuestion.findUnique({ where: { id } });
+    const quizQuestion = await this.prisma.quizQuestion.findUnique({
+      where: { id },
+    });
 
     if (!quizQuestion) throw BaseError.notFound("Quiz question not found.");
 
-    const deleted = await this.prisma.QuizQuestion.delete({ where: { id } });
-
+    const deleted = await this.prisma.quizQuestion.delete({ where: { id } });
     return {
       data: deleted,
       message: "Quiz question deleted successfully.",

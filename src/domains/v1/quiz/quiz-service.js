@@ -127,12 +127,9 @@ class QuizService {
       try {
         const referenceDate = new Date(value.end_date);
 
-        // Set Start Time
+        const endTime = new Date(referenceDate);
         const startTime = new Date(referenceDate);
         startTime.setHours(0, 0, 0, 0);
-
-        // Set End Time
-        const endTime = referenceDate;
 
         const schedulePayload = {
           title: `Due: ${value.title}`,

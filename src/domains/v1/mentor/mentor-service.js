@@ -2,7 +2,6 @@ import { PrismaService } from "../../../common/services/prisma-service.js";
 import { buildQueryOptions } from "../../../utils/buildQueryOptions.js";
 import BaseError from "../../../base-classes/base-error.js";
 import mentorQueryConfig from "./mentor-query-config.js";
-import Role from "../../../common/enums/role-enum.js";
 
 class MentorService {
   constructor() {
@@ -35,19 +34,14 @@ class MentorService {
   async getById(id) {
     const data = await this.prisma.mentor.findFirst({
       where: { id },
-      select: {
-        id: true,
-        bio: true,
-        reason: true,
-        motivation: true,
-        cv_uri: true,
-        portfolio_uri: true,
-        status: true,
+      include: {
         user: {
           select: {
             id: true,
             name: true,
             email: true,
+            phone_number: true,
+            profile_uri: true,
           },
         },
         course: {
@@ -55,6 +49,7 @@ class MentorService {
             id: true,
             title: true,
             code: true,
+            price: true,
           },
         },
       },

@@ -21,16 +21,12 @@ class CourseService {
             select: {
               id: true,
               bio: true,
-              reason: true,
-              motivation: true,
-              cv_uri: true,
-              portfolio_uri: true,
-              status: true,
               user: {
                 select: {
                   id: true,
                   name: true,
                   email: true,
+                  profile_uri: true,
                 },
               },
             },
@@ -93,18 +89,20 @@ class CourseService {
           select: {
             id: true,
             bio: true,
-            reason: true,
-            motivation: true,
-            cv_uri: true,
-            portfolio_uri: true,
             status: true,
             user: {
               select: {
                 id: true,
                 name: true,
                 email: true,
+                profile_uri: true,
               },
             },
+          },
+        },
+        course_enrollments: {
+          select: {
+            user_id: true,
           },
         },
         schedules: true,

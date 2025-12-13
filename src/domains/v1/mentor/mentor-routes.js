@@ -18,7 +18,7 @@ class MentorRoutes extends BaseRoutes {
     // =======================================================
     this.router.get("/", [
       authTokenMiddleware.authenticate,
-      authTokenMiddleware.authorizeRoles([Role.ADMIN]),
+      authTokenMiddleware.authorizeRoles([Role.ADMIN, Role.STUDENT]),
       validateQueryParamsCredentials(getAllMentorParamsSchema),
       tryCatch(mentorController.getAll),
     ]);
@@ -28,7 +28,7 @@ class MentorRoutes extends BaseRoutes {
     // =======================================================
     this.router.get("/:id", [
       authTokenMiddleware.authenticate,
-      authTokenMiddleware.authorizeRoles([Role.ADMIN]),
+      authTokenMiddleware.authorizeRoles([Role.ADMIN, Role.STUDENT]),
       tryCatch(mentorController.getById),
     ]);
 
@@ -37,7 +37,6 @@ class MentorRoutes extends BaseRoutes {
     // =======================================================
     this.router.post("/", [
       authTokenMiddleware.authenticate,
-      // Hanya admin dan user biasa (calon mentor) yang boleh mendaftar
       authTokenMiddleware.authorizeRoles([Role.ADMIN, Role.STUDENT]),
       validateCredentials(createMentorSchema),
       tryCatch(mentorController.create),

@@ -64,6 +64,13 @@ const getAllCourseParamsSchema = Joi.object({
 
   search: Joi.string().allow("", null).optional(),
 
+  advSearch: Joi.object({
+    enrolled: Joi.object({
+      member: Joi.boolean().optional(),
+      mentor: Joi.boolean().optional(),
+    }).optional(),
+  }).optional(),
+
   filter: Joi.object({
     is_open_registration_member: Joi.boolean().optional(),
     is_open_registration_mentor: Joi.boolean().optional(),

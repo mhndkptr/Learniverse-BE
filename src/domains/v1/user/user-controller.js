@@ -1,9 +1,11 @@
 
 import UserService from "./user-service.js";
+import BaseError from "../../../base-classes/base-error.js";
+import Role from "../../../common/enums/role-enum.js";
 import {
-	successResponse,
-	createdResponse,
-	updatedResponse,
+  successResponse,
+  createdResponse,
+  updatedResponse,
 } from "../../../utils/response.js";
 
 class UserController {
@@ -31,7 +33,15 @@ class UserController {
 
 	async update(req, res) {
 		const { id } = req.params;
-		const data = await UserService.update(id, req.body);
+
+		// Only admins or the owner of the profile can update
+		const requester = req.user;
+		if (!requester) throw BaseError.unauthorized("Unauthorized");
+		if (requester.role !== Role.ADMIN && requester.id !== id) {
+			throw BaseError.forbidden("You can only update your own profile");
+		}
+
+		const data = await UserService.update(id, req.body, req.file);
 		return updatedResponse(res, data, "User updated successfully");
 	}
 
@@ -44,4 +54,3 @@ class UserController {
 }
 
 export default new UserController();
-

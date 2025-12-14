@@ -10,6 +10,7 @@ import tryCatch from "../../../utils/tryCatcher.js";
 import userController from "./user-controller.js";
 import Role from "../../../common/enums/role-enum.js";
 import validateQueryParamsCredentials from "../../../middlewares/validate-query-params-credentials-middleware.js";
+import uploadFile from "../../../middlewares/upload-file-middleware.js";
 
 class UserRoutes extends BaseRoutes {
   routes() {
@@ -36,7 +37,8 @@ class UserRoutes extends BaseRoutes {
     this.router.patch(
       "/:id",
       authTokenMiddleware.authenticate,
-      authTokenMiddleware.authorizeRoles([Role.ADMIN]),
+      authTokenMiddleware.authorizeRoles([Role.ADMIN, Role.STUDENT]),
+      uploadFile("image").single("profile_uri"),
       validateCredentials(updateUserSchema),
       tryCatch(userController.update)
     );

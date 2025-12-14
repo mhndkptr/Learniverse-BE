@@ -1,14 +1,14 @@
 import BaseError from "../../../base-classes/base-error.js";
 import { PrismaService } from "../../../common/services/prisma-service.js";
-import path from "path";
-import fs from "fs";
 import { hashPassword } from "../../../utils/passwordConfig.js";
 import { buildQueryOptions } from "../../../utils/buildQueryOptions.js";
 import userQueryConfig from "./user-query-config.js";
+import { CloudinaryService } from "../../../common/services/cloudinary-service.js";
 
 class UserService {
 	constructor() {
 		this.prisma = new PrismaService();
+		this.cloudinary = new CloudinaryService();
 	}
 
 	async getAll(query = {}) {
@@ -60,7 +60,7 @@ class UserService {
 		return user;
 	}
 
-	async update(id, data) {
+	async update(id, data, file) {
 		const user = await this.prisma.user.findUnique({ where: { id } });
 		if (!user) throw BaseError.notFound("User not found");
 
@@ -88,6 +88,29 @@ class UserService {
 			updateData.password = await hashPassword(data.password);
 		}
 
+		// handle profile image upload
+		if (file) {
+			// delete old image if exists (best-effort)
+			if (user.profile_uri) {
+				try {
+					await this.cloudinary.deleteFromUrlsCloudinary([user.profile_uri]);
+				} catch (err) {
+					console.warn(
+						"[WARN] Failed to delete old profile image, continuing update...",
+						err.message
+					);
+				}
+			}
+
+			const upload = await this.cloudinary.uploadFromBufferToCloudinary(
+				file.buffer,
+				"user/profile"
+			);
+			if (upload?.secure_url) {
+				updateData.profile_uri = upload.secure_url;
+			}
+		}
+
 		const updated = await this.prisma.user.update({ where: { id }, data: updateData });
 		return updated;
 	}
@@ -103,4 +126,3 @@ class UserService {
 }
 
 export default new UserService();
-

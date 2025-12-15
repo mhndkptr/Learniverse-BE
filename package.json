@@ -13,7 +13,7 @@
     "dev": "cross-env NODE_ENV=development && nodemon src/app.js",
     "start": "node dist/app.js",
     "build": "npx babel src --out-dir dist --extensions \".js,.jsx\"",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
     "format": "biome format src --write",
     "seed:admin": "node dist/seeders/admin-seed.js",
     "seed": "node prisma/seed.js"

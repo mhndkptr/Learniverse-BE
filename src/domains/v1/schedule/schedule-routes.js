@@ -13,11 +13,15 @@ import {
 class ScheduleRoutes extends BaseRoutes {
   routes() {
     this.router.get("/", [
+      authTokenMiddleware.authenticate,
       validateQueryParamsCredentials(getAllScheduleParamsSchema),
       tryCatch(ScheduleController.getAll),
     ]);
 
-    this.router.get("/:id", [tryCatch(ScheduleController.getById)]);
+    this.router.get("/:id", [
+      authTokenMiddleware.authenticate,
+      tryCatch(ScheduleController.getById)]
+    );
 
     this.router.post("/", [
       authTokenMiddleware.authenticate,

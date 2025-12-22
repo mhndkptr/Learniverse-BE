@@ -17,7 +17,15 @@ const getAllQuizParamsSchema = Joi.object({
     .items(
       Joi.object({
         field: Joi.string()
-          .valid("title", "identifier", "type", "start_time", "created_at")
+          .valid(
+            "title",
+            "status",
+            "description",
+            "duration",
+            "end_date",
+            "start_date",
+            "created_at"
+          )
           .required(),
         direction: Joi.string().valid("asc", "desc").default("asc"),
       })
@@ -33,11 +41,10 @@ const getAllQuizParamsSchema = Joi.object({
     .optional(),
 
   filter: Joi.object({
-    type: Joi.string()
+    status: Joi.string()
       .valid(...Object.values(QuizType))
       .optional(),
-    schedule_id: Joi.string().uuid().optional(),
-    Quiz_id: Joi.string().uuid().optional(),
+    course_id: Joi.string().uuid().optional(),
   }),
 });
 
@@ -71,7 +78,7 @@ const createQuizSchema = Joi.object({
   }),
 
   end_date: Joi.date().iso().required().messages({
-    "any.required": "End date is required.", 
+    "any.required": "End date is required.",
     "date.format": "End date must be in ISO 8601 format.",
   }),
 
@@ -94,7 +101,6 @@ const createQuizSchema = Joi.object({
   max_attempt: Joi.number().integer().min(1).optional(),
   duration: Joi.number().integer().min(0).optional(),
   course_id: Joi.string().uuid().optional(),
-
 });
 
 const updateQuizSchema = Joi.object({
@@ -105,11 +111,9 @@ const updateQuizSchema = Joi.object({
 
   description: Joi.string().allow(null, ""),
 
-  status: Joi.string()
-    .valid("PUBLISH", "DRAFT")
-    .messages({
-      "any.only": "Status must be one of: PUBLISH, DRAFT",
-    }),
+  status: Joi.string().valid("PUBLISH", "DRAFT").messages({
+    "any.only": "Status must be one of: PUBLISH, DRAFT",
+  }),
 
   show_review: Joi.boolean().optional(),
 
@@ -132,7 +136,6 @@ const updateQuizSchema = Joi.object({
   course_id: Joi.string().uuid().messages({
     "string.uuid": "Course ID must be a valid UUID.",
   }),
-  
 })
   .min(1)
   .messages({
@@ -143,4 +146,9 @@ const deleteQuizSchema = Joi.object({
   force: Joi.boolean().optional(),
 });
 
-export { createQuizSchema, updateQuizSchema, getAllQuizParamsSchema, deleteQuizSchema};
+export {
+  createQuizSchema,
+  updateQuizSchema,
+  getAllQuizParamsSchema,
+  deleteQuizSchema,
+};

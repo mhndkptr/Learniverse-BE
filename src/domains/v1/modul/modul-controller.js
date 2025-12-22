@@ -4,7 +4,7 @@ import ModulService from "./modul-service.js";
 
 class ModulController {
   async getAll(req, res) {
-    const data = await ModulService.getAll();
+    const data = await ModulService.getAll(req.validatedQuery || {});
     return successResponse(
       res,
       data.data,

@@ -1,0 +1,2970 @@
+{
+  "generatedAt": "2025-12-17T08:35:20.001Z",
+  "targetDir": "src/domains/v1",
+  "totals": {
+    "classes": 26,
+    "methods": 123,
+    "wmc": 335,
+    "rfc": 417,
+    "cbo": 111
+  },
+  "domainSummary": [
+    {
+      "domain": "auth",
+      "classes": 2,
+      "methods": 8,
+      "wmc": 22,
+      "avgComplexity": 2.75,
+      "rfc": 30,
+      "cbo": 11
+    },
+    {
+      "domain": "course",
+      "classes": 6,
+      "methods": 23,
+      "wmc": 76,
+      "avgComplexity": 3.3,
+      "rfc": 93,
+      "cbo": 29
+    },
+    {
+      "domain": "mentor",
+      "classes": 2,
+      "methods": 10,
+      "wmc": 16,
+      "avgComplexity": 1.6,
+      "rfc": 28,
+      "cbo": 7
+    },
+    {
+      "domain": "modul",
+      "classes": 2,
+      "methods": 10,
+      "wmc": 27,
+      "avgComplexity": 2.7,
+      "rfc": 32,
+      "cbo": 8
+    },
+    {
+      "domain": "quiz",
+      "classes": 10,
+      "methods": 52,
+      "wmc": 142,
+      "avgComplexity": 2.73,
+      "rfc": 168,
+      "cbo": 38
+    },
+    {
+      "domain": "schedule",
+      "classes": 2,
+      "methods": 10,
+      "wmc": 24,
+      "avgComplexity": 2.4,
+      "rfc": 31,
+      "cbo": 8
+    },
+    {
+      "domain": "user",
+      "classes": 2,
+      "methods": 10,
+      "wmc": 28,
+      "avgComplexity": 2.8,
+      "rfc": 35,
+      "cbo": 10
+    }
+  ],
+  "classes": [
+    {
+      "className": "AuthController",
+      "filePath": "src/domains/v1/auth/auth-controller.js",
+      "domain": "auth",
+      "methods": [
+        {
+          "name": "login",
+          "complexity": 2,
+          "calls": [
+            "AuthService.login",
+            "BaseError.badRequest",
+            "parseExpireToMs",
+            "res.cookie",
+            "successResponse"
+          ],
+          "loc": 20
+        },
+        {
+          "name": "register",
+          "complexity": 2,
+          "calls": [
+            "AuthService.register",
+            "BaseError.badRequest",
+            "successResponse"
+          ],
+          "loc": 20
+        },
+        {
+          "name": "refreshToken",
+          "complexity": 2,
+          "calls": [
+            "AuthService.refreshToken",
+            "BaseError.unauthorized",
+            "res.header",
+            "successResponse"
+          ],
+          "loc": 13
+        },
+        {
+          "name": "me",
+          "complexity": 2,
+          "calls": [
+            "AuthService.getProfile",
+            "BaseError.unauthorized",
+            "successResponse"
+          ],
+          "loc": 11
+        }
+      ],
+      "methodCount": 4,
+      "wmc": 8,
+      "avgComplexity": 2,
+      "rfc": 14,
+      "cbo": 4,
+      "loc": 69,
+      "extendsName": null,
+      "dit": 1,
+      "noc": 0
+    },
+    {
+      "className": "AuthService",
+      "filePath": "src/domains/v1/auth/auth-service.js",
+      "domain": "auth",
+      "methods": [
+        {
+          "name": "login",
+          "complexity": 3,
+          "calls": [
+            "BaseError.badRequest",
+            "BaseError.notFound",
+            "generateAccessToken",
+            "generateRefreshToken",
+            "matchPassword",
+            "this.prisma.user.findFirst"
+          ],
+          "loc": 39
+        },
+        {
+          "name": "register",
+          "complexity": 5,
+          "calls": [
+            "BaseError.badRequest",
+            "hashPassword",
+            "this.cloudinary.uploadFromBufferToCloudinary",
+            "this.prisma.user.create",
+            "this.prisma.user.findFirst"
+          ],
+          "loc": 48
+        },
+        {
+          "name": "refreshToken",
+          "complexity": 4,
+          "calls": [
+            "BaseError.notFound",
+            "BaseError.unauthorized",
+            "generateAccessToken",
+            "parseRefreshToken",
+            "this.prisma.user.findUnique"
+          ],
+          "loc": 28
+        },
+        {
+          "name": "getProfile",
+          "complexity": 2,
+          "calls": [
+            "BaseError.notFound",
+            "this.prisma.user.findFirst"
+          ],
+          "loc": 13
+        }
+      ],
+      "methodCount": 4,
+      "wmc": 14,
+      "avgComplexity": 3.5,
+      "rfc": 16,
+      "cbo": 7,
+      "loc": 139,
+      "extendsName": null,
+      "dit": 1,
+      "noc": 0
+    },
+    {
+      "className": "CourseController",
+      "filePath": "src/domains/v1/course/course-controller.js",
+      "domain": "course",
+      "methods": [
+        {
+          "name": "getAll",
+          "complexity": 2,
+          "calls": [
+            "CourseService.getAll",
+            "successResponse"
+          ],
+          "loc": 9
+        },
+        {
+          "name": "getAllMe",
+          "complexity": 1,
+          "calls": [
+            "CourseService.getAllMe",
+            "successResponse"
+          ],
+          "loc": 9
+        },
+        {
+          "name": "getById",
+          "complexity": 1,
+          "calls": [
+            "CourseService.getById",
+            "successResponse"
+          ],
+          "loc": 5
+        },
+        {
+          "name": "create",
+          "complexity": 4,
+          "calls": [
+            "BaseError.badRequest",
+            "CourseService.create",
+            "String",
+            "createdResponse",
+            "parseFloat"
+          ],
+          "loc": 19
+        },
+        {
+          "name": "update",
+          "complexity": 5,
+          "calls": [
+            "BaseError.badRequest",
+            "CourseService.update",
+            "String",
+            "parseFloat",
+            "successResponse"
+          ],
+          "loc": 23
+        },
+        {
+          "name": "delete",
+          "complexity": 1,
+          "calls": [
+            "CourseService.delete",
+            "successResponse"
+          ],
+          "loc": 5
+        }
+      ],
+      "methodCount": 6,
+      "wmc": 14,
+      "avgComplexity": 2.33,
+      "rfc": 17,
+      "cbo": 3,
+      "loc": 77,
+      "extendsName": null,
+      "dit": 1,
+      "noc": 0
+    },
+    {
+      "className": "CourseEnrollmentController",
+      "filePath": "src/domains/v1/course/course-enrollment/course-enrollment-controller.js",
+      "domain": "course",
+      "methods": [
+        {
+          "name": "getAll",
+          "complexity": 1,
+          "calls": [
+            "CourseEnrollmentService.getAll",
+            "successResponse"
+          ],
+          "loc": 13
+        },
+        {
+          "name": "create",
+          "complexity": 2,
+          "calls": [
+            "BaseError.badRequest",
+            "CourseEnrollmentService.create",
+            "createdResponse"
+          ],
+          "loc": 15
+        }
+      ],
+      "methodCount": 2,
+      "wmc": 3,
+      "avgComplexity": 1.5,
+      "rfc": 7,
+      "cbo": 3,
+      "loc": 31,
+      "extendsName": null,
+      "dit": 1,
+      "noc": 0
+    },
+    {
+      "className": "CourseEnrollmentService",
+      "filePath": "src/domains/v1/course/course-enrollment/course-enrollment-service.js",
+      "domain": "course",
+      "methods": [
+        {
+          "name": "getAll",
+          "complexity": 4,
+          "calls": [
+            "Math.ceil",
+            "Promise.all",
+            "buildQueryOptions",
+            "this.prisma.courseEnrollment.count",
+            "this.prisma.courseEnrollment.findMany"
+          ],
+          "loc": 29
+        },
+        {
+          "name": "create",
+          "complexity": 6,
+          "calls": [
+            "BaseError.badRequest",
+            "stack.push",
+            "this.prisma.course.findFirst",
+            "this.prisma.courseEnrollment.create",
+            "this.prisma.courseEnrollment.findFirst",
+            "this.prisma.courseTransaction.findFirst",
+            "this.prisma.user.findFirst"
+          ],
+          "loc": 80
+        }
+      ],
+      "methodCount": 2,
+      "wmc": 10,
+      "avgComplexity": 5,
+      "rfc": 14,
+      "cbo": 5,
+      "loc": 116,
+      "extendsName": null,
+      "dit": 1,
+      "noc": 0
+    },
+    {
+      "className": "CourseService",
+      "filePath": "src/domains/v1/course/course-service.js",
+      "domain": "course",
+      "methods": [
+        {
+          "name": "getAll",
+          "complexity": 1,
+          "calls": [
+            "Math.ceil",
+            "Promise.all",
+            "buildQueryOptions",
+            "this.prisma.course.count",
+            "this.prisma.course.findMany"
+          ],
+          "loc": 43
+        },
+        {
+          "name": "getAllMe",
+          "complexity": 1,
+          "calls": [
+            "this.prisma.course.findMany"
+          ],
+          "loc": 26
+        },
+        {
+          "name": "getById",
+          "complexity": 2,
+          "calls": [
+            "BaseError.notFound",
+            "this.prisma.course.findFirst"
+          ],
+          "loc": 33
+        },
+        {
+          "name": "create",
+          "complexity": 3,
+          "calls": [
+            "this.cloudinary.uploadFromBufferToCloudinary",
+            "this.prisma.course.create"
+          ],
+          "loc": 13
+        },
+        {
+          "name": "update",
+          "complexity": 6,
+          "calls": [
+            "BaseError.notFound",
+            "console.warn",
+            "this.cloudinary.deleteFromUrlsCloudinary",
+            "this.cloudinary.uploadFromBufferToCloudinary",
+            "this.prisma.course.findFirst",
+            "this.prisma.course.update"
+          ],
+          "loc": 28
+        },
+        {
+          "name": "delete",
+          "complexity": 4,
+          "calls": [
+            "BaseError.notFound",
+            "console.warn",
+            "this.cloudinary.deleteFromUrlsCloudinary",
+            "this.prisma.course.delete",
+            "this.prisma.course.findFirst"
+          ],
+          "loc": 18
+        }
+      ],
+      "methodCount": 6,
+      "wmc": 17,
+      "avgComplexity": 2.83,
+      "rfc": 19,
+      "cbo": 5,
+      "loc": 173,
+      "extendsName": null,
+      "dit": 1,
+      "noc": 0
+    },
+    {
+      "className": "CourseTransactionController",
+      "filePath": "src/domains/v1/course/course-transaction/course-transaction-controller.js",
+      "domain": "course",
+      "methods": [
+        {
+          "name": "getAll",
+          "complexity": 1,
+          "calls": [
+            "CourseTransactionService.getAll",
+            "successResponse"
+          ],
+          "loc": 13
+        },
+        {
+          "name": "create",
+          "complexity": 2,
+          "calls": [
+            "BaseError.badRequest",
+            "CourseTransactionService.create",
+            "createdResponse"
+          ],
+          "loc": 15
+        },
+        {
+          "name": "notify",
+          "complexity": 2,
+          "calls": [
+            "BaseError.badRequest",
+            "CourseTransactionService.notify",
+            "successResponse"
+          ],
+          "loc": 15
+        }
+      ],
+      "methodCount": 3,
+      "wmc": 5,
+      "avgComplexity": 1.67,
+      "rfc": 9,
+      "cbo": 3,
+      "loc": 47,
+      "extendsName": null,
+      "dit": 1,
+      "noc": 0
+    },
+    {
+      "className": "CourseTransactionService",
+      "filePath": "src/domains/v1/course/course-transaction/course-transaction-service.js",
+      "domain": "course",
+      "methods": [
+        {
+          "name": "getAll",
+          "complexity": 4,
+          "calls": [
+            "Math.ceil",
+            "Promise.all",
+            "buildQueryOptions",
+            "this.prisma.courseTransaction.count",
+            "this.prisma.courseTransaction.findMany"
+          ],
+          "loc": 29
+        },
+        {
+          "name": "create",
+          "complexity": 7,
+          "calls": [
+            "BaseError.badRequest",
+            "BaseError.forbidden",
+            "Number",
+            "Object.values",
+            "format",
+            "stack.push",
+            "this.midtrans.snap.createTransaction",
+            "this.prisma.$transaction",
+            "tx.course.findFirst",
+            "tx.courseEnrollment.findFirst",
+            "tx.courseTransaction.create",
+            "tx.courseTransaction.update",
+            "tx.user.findFirst"
+          ],
+          "loc": 120
+        },
+        {
+          "name": "notify",
+          "complexity": 4,
+          "calls": [
+            "crypto.createHash",
+            "this.updateWebhookMidtrans"
+          ],
+          "loc": 20
+        },
+        {
+          "name": "updateWebhookMidtrans",
+          "complexity": 12,
+          "calls": [
+            "this.CourseEnrollmentService.create",
+            "this.prisma.courseTransaction.findFirst",
+            "this.prisma.courseTransaction.update"
+          ],
+          "loc": 70
+        }
+      ],
+      "methodCount": 4,
+      "wmc": 27,
+      "avgComplexity": 6.75,
+      "rfc": 27,
+      "cbo": 10,
+      "loc": 250,
+      "extendsName": null,
+      "dit": 1,
+      "noc": 0
+    },
+    {
+      "className": "MentorController",
+      "filePath": "src/domains/v1/mentor/mentor-controller.js",
+      "domain": "mentor",
+      "methods": [
+        {
+          "name": "getAll",
+          "complexity": 2,
+          "calls": [
+            "MentorService.getAll",
+            "successResponse"
+          ],
+          "loc": 9
+        },
+        {
+          "name": "getById",
+          "complexity": 1,
+          "calls": [
+            "MentorService.getById",
+            "successResponse"
+          ],
+          "loc": 5
+        },
+        {
+          "name": "create",
+          "complexity": 2,
+          "calls": [
+            "BaseError.badRequest",
+            "MentorService.create",
+            "createdResponse"
+          ],
+          "loc": 5
+        },
+        {
+          "name": "update",
+          "complexity": 2,
+          "calls": [
+            "BaseError.badRequest",
+            "MentorService.update",
+            "successResponse"
+          ],
+          "loc": 6
+        },
+        {
+          "name": "delete",
+          "complexity": 1,
+          "calls": [
+            "MentorService.delete",
+            "successResponse"
+          ],
+          "loc": 5
+        }
+      ],
+      "methodCount": 5,
+      "wmc": 8,
+      "avgComplexity": 1.6,
+      "rfc": 13,
+      "cbo": 3,
+      "loc": 41,
+      "extendsName": null,
+      "dit": 1,
+      "noc": 0
+    },
+    {
+      "className": "MentorService",
+      "filePath": "src/domains/v1/mentor/mentor-service.js",
+      "domain": "mentor",
+      "methods": [
+        {
+          "name": "getAll",
+          "complexity": 1,
+          "calls": [
+            "Math.ceil",
+            "Promise.all",
+            "buildQueryOptions",
+            "this.prisma.mentor.count",
+            "this.prisma.mentor.findMany"
+          ],
+          "loc": 22
+        },
+        {
+          "name": "getById",
+          "complexity": 2,
+          "calls": [
+            "BaseError.notFound",
+            "this.prisma.mentor.findFirst"
+          ],
+          "loc": 27
+        },
+        {
+          "name": "create",
+          "complexity": 1,
+          "calls": [
+            "this.prisma.mentor.create"
+          ],
+          "loc": 3
+        },
+        {
+          "name": "update",
+          "complexity": 2,
+          "calls": [
+            "BaseError.notFound",
+            "this.prisma.mentor.findFirst",
+            "this.prisma.mentor.update"
+          ],
+          "loc": 6
+        },
+        {
+          "name": "delete",
+          "complexity": 2,
+          "calls": [
+            "BaseError.notFound",
+            "this.prisma.mentor.delete",
+            "this.prisma.mentor.findFirst"
+          ],
+          "loc": 7
+        }
+      ],
+      "methodCount": 5,
+      "wmc": 8,
+      "avgComplexity": 1.6,
+      "rfc": 15,
+      "cbo": 4,
+      "loc": 75,
+      "extendsName": null,
+      "dit": 1,
+      "noc": 0
+    },
+    {
+      "className": "ModulController",
+      "filePath": "src/domains/v1/modul/modul-controller.js",
+      "domain": "modul",
+      "methods": [
+        {
+          "name": "getAll",
+          "complexity": 1,
+          "calls": [
+            "ModulService.getAll",
+            "successResponse"
+          ],
+          "loc": 9
+        },
+        {
+          "name": "getById",
+          "complexity": 3,
+          "calls": [
+            "BaseError.badRequest",
+            "BaseError.notFound",
+            "ModulService.getById",
+            "successResponse"
+          ],
+          "loc": 15
+        },
+        {
+          "name": "create",
+          "complexity": 3,
+          "calls": [
+            "BaseError.badRequest",
+            "ModulService.create",
+            "createdResponse"
+          ],
+          "loc": 24
+        },
+        {
+          "name": "update",
+          "complexity": 3,
+          "calls": [
+            "BaseError.badRequest",
+            "ModulService.update",
+            "successResponse"
+          ],
+          "loc": 15
+        },
+        {
+          "name": "remove",
+          "complexity": 2,
+          "calls": [
+            "BaseError.badRequest",
+            "ModulService.remove",
+            "successResponse"
+          ],
+          "loc": 11
+        }
+      ],
+      "methodCount": 5,
+      "wmc": 12,
+      "avgComplexity": 2.4,
+      "rfc": 14,
+      "cbo": 3,
+      "loc": 80,
+      "extendsName": null,
+      "dit": 1,
+      "noc": 0
+    },
+    {
+      "className": "ModulService",
+      "filePath": "src/domains/v1/modul/modul-service.js",
+      "domain": "modul",
+      "methods": [
+        {
+          "name": "getAll",
+          "complexity": 1,
+          "calls": [
+            "Math.ceil",
+            "Promise.all",
+            "buildQueryOptions",
+            "this.prisma.modul.count",
+            "this.prisma.modul.findMany"
+          ],
+          "loc": 22
+        },
+        {
+          "name": "getById",
+          "complexity": 2,
+          "calls": [
+            "BaseError.notFound",
+            "this.prisma.modul.findUnique"
+          ],
+          "loc": 19
+        },
+        {
+          "name": "create",
+          "complexity": 4,
+          "calls": [
+            "BaseError.notFound",
+            "this.cloudinary.uploadFromBufferToCloudinary",
+            "this.prisma.course.findUnique",
+            "this.prisma.modul.create"
+          ],
+          "loc": 31
+        },
+        {
+          "name": "update",
+          "complexity": 5,
+          "calls": [
+            "BaseError.notFound",
+            "this.cloudinary.deleteFromUrlsCloudinary",
+            "this.cloudinary.uploadFromBufferToCloudinary",
+            "this.prisma.modul.findUnique",
+            "this.prisma.modul.update"
+          ],
+          "loc": 31
+        },
+        {
+          "name": "remove",
+          "complexity": 3,
+          "calls": [
+            "BaseError.notFound",
+            "this.cloudinary.deleteFromUrlsCloudinary",
+            "this.prisma.modul.delete",
+            "this.prisma.modul.findUnique"
+          ],
+          "loc": 19
+        }
+      ],
+      "methodCount": 5,
+      "wmc": 15,
+      "avgComplexity": 3,
+      "rfc": 18,
+      "cbo": 5,
+      "loc": 133,
+      "extendsName": null,
+      "dit": 1,
+      "noc": 0
+    },
+    {
+      "className": "QuizAttemptController",
+      "filePath": "src/domains/v1/quiz/quiz-attempt/quiz-attempt-controller.js",
+      "domain": "quiz",
+      "methods": [
+        {
+          "name": "getAll",
+          "complexity": 1,
+          "calls": [
+            "QuizAttemptService.getAll",
+            "successResponse"
+          ],
+          "loc": 10
+        },
+        {
+          "name": "getById",
+          "complexity": 1,
+          "calls": [
+            "QuizAttemptService.getById",
+            "successResponse"
+          ],
+          "loc": 7
+        },
+        {
+          "name": "create",
+          "complexity": 2,
+          "calls": [
+            "BaseError.badRequest",
+            "QuizAttemptService.create",
+            "createdResponse"
+          ],
+          "loc": 11
+        },
+        {
+          "name": "update",
+          "complexity": 2,
+          "calls": [
+            "BaseError.badRequest",
+            "QuizAttemptService.update",
+            "successResponse"
+          ],
+          "loc": 12
+        },
+        {
+          "name": "delete",
+          "complexity": 1,
+          "calls": [
+            "QuizAttemptService.delete",
+            "successResponse"
+          ],
+          "loc": 7
+        }
+      ],
+      "methodCount": 5,
+      "wmc": 7,
+      "avgComplexity": 1.4,
+      "rfc": 13,
+      "cbo": 3,
+      "loc": 53,
+      "extendsName": null,
+      "dit": 1,
+      "noc": 0
+    },
+    {
+      "className": "QuizAttemptQuestionAnswerController",
+      "filePath": "src/domains/v1/quiz/quiz-attempt-question-answer/quiz-attempt-question-answer-controller.js",
+      "domain": "quiz",
+      "methods": [
+        {
+          "name": "getAll",
+          "complexity": 1,
+          "calls": [
+            "QuizAttemptQuestionAnswerService.getAll",
+            "successResponse"
+          ],
+          "loc": 10
+        },
+        {
+          "name": "getById",
+          "complexity": 1,
+          "calls": [
+            "QuizAttemptQuestionAnswerService.getById",
+            "successResponse"
+          ],
+          "loc": 7
+        },
+        {
+          "name": "create",
+          "complexity": 2,
+          "calls": [
+            "BaseError.badRequest",
+            "QuizAttemptQuestionAnswerService.create",
+            "createdResponse"
+          ],
+          "loc": 11
+        },
+        {
+          "name": "update",
+          "complexity": 2,
+          "calls": [
+            "BaseError.badRequest",
+            "QuizAttemptQuestionAnswerService.update",
+            "successResponse"
+          ],
+          "loc": 12
+        },
+        {
+          "name": "delete",
+          "complexity": 1,
+          "calls": [
+            "QuizAttemptQuestionAnswerService.delete",
+            "successResponse"
+          ],
+          "loc": 7
+        }
+      ],
+      "methodCount": 5,
+      "wmc": 7,
+      "avgComplexity": 1.4,
+      "rfc": 13,
+      "cbo": 3,
+      "loc": 53,
+      "extendsName": null,
+      "dit": 1,
+      "noc": 0
+    },
+    {
+      "className": "QuizAttemptQuestionAnswerService",
+      "filePath": "src/domains/v1/quiz/quiz-attempt-question-answer/quiz-attempt-question-answer-service.js",
+      "domain": "quiz",
+      "methods": [
+        {
+          "name": "getAll",
+          "complexity": 7,
+          "calls": [
+            "Math.ceil",
+            "Promise.all",
+            "buildQueryOptions",
+            "this.prisma.QuizAttemptQuestionAnswer.count",
+            "this.prisma.QuizAttemptQuestionAnswer.findMany"
+          ],
+          "loc": 35
+        },
+        {
+          "name": "getById",
+          "complexity": 2,
+          "calls": [
+            "BaseError.notFound",
+            "this.prisma.QuizAttemptQuestionAnswer.findFirst"
+          ],
+          "loc": 14
+        },
+        {
+          "name": "create",
+          "complexity": 2,
+          "calls": [
+            "BaseError.notFound",
+            "this.prisma.QuizAttempt.findUnique",
+            "this.prisma.QuizAttemptQuestionAnswer.create"
+          ],
+          "loc": 18
+        },
+        {
+          "name": "update",
+          "complexity": 3,
+          "calls": [
+            "BaseError.notFound",
+            "this.prisma.QuizAttemptQuestionAnswer.findUnique",
+            "this.prisma.QuizAttemptQuestionAnswer.update"
+          ],
+          "loc": 18
+        },
+        {
+          "name": "delete",
+          "complexity": 2,
+          "calls": [
+            "BaseError.notFound",
+            "this.prisma.QuizAttemptQuestionAnswer.delete",
+            "this.prisma.QuizAttemptQuestionAnswer.findUnique"
+          ],
+          "loc": 15
+        }
+      ],
+      "methodCount": 5,
+      "wmc": 16,
+      "avgComplexity": 3.2,
+      "rfc": 17,
+      "cbo": 4,
+      "loc": 110,
+      "extendsName": null,
+      "dit": 1,
+      "noc": 0
+    },
+    {
+      "className": "QuizAttemptService",
+      "filePath": "src/domains/v1/quiz/quiz-attempt/quiz-attempt-service.js",
+      "domain": "quiz",
+      "methods": [
+        {
+          "name": "getAll",
+          "complexity": 7,
+          "calls": [
+            "Math.ceil",
+            "Promise.all",
+            "buildQueryOptions",
+            "this.prisma.QuizAttempt.count",
+            "this.prisma.QuizAttempt.findMany"
+          ],
+          "loc": 43
+        },
+        {
+          "name": "getById",
+          "complexity": 2,
+          "calls": [
+            "BaseError.notFound",
+            "this.prisma.QuizAttempt.findFirst"
+          ],
+          "loc": 32
+        },
+        {
+          "name": "create",
+          "complexity": 9,
+          "calls": [
+            "BaseError.badRequest",
+            "this.prisma.Quiz.findUnique",
+            "this.prisma.QuizAttempt.count",
+            "this.prisma.QuizAttempt.create",
+            "this.prisma.User.findUnique"
+          ],
+          "loc": 98
+        },
+        {
+          "name": "update",
+          "complexity": 8,
+          "calls": [
+            "BaseError.badRequest",
+            "BaseError.notFound",
+            "this.prisma.QuizAttempt.findUnique",
+            "this.prisma.QuizAttempt.update",
+            "this.prisma.QuizAttemptQuestionAnswer.createMany",
+            "this.prisma.QuizAttemptQuestionAnswer.deleteMany",
+            "value.quiz_attempt_question_answers.map"
+          ],
+          "loc": 77
+        },
+        {
+          "name": "delete",
+          "complexity": 2,
+          "calls": [
+            "BaseError.notFound",
+            "this.prisma.QuizAttempt.delete",
+            "this.prisma.QuizAttempt.findUnique"
+          ],
+          "loc": 16
+        }
+      ],
+      "methodCount": 5,
+      "wmc": 28,
+      "avgComplexity": 5.6,
+      "rfc": 22,
+      "cbo": 5,
+      "loc": 276,
+      "extendsName": null,
+      "dit": 1,
+      "noc": 0
+    },
+    {
+      "className": "QuizController",
+      "filePath": "src/domains/v1/quiz/quiz-controller.js",
+      "domain": "quiz",
+      "methods": [
+        {
+          "name": "getAll",
+          "complexity": 1,
+          "calls": [
+            "QuizService.getAll",
+            "successResponse"
+          ],
+          "loc": 10
+        },
+        {
+          "name": "getAllForStudent",
+          "complexity": 1,
+          "calls": [
+            "QuizService.getAllForStudent",
+            "successResponse"
+          ],
+          "loc": 10
+        },
+        {
+          "name": "getById",
+          "complexity": 1,
+          "calls": [
+            "QuizService.getById",
+            "successResponse"
+          ],
+          "loc": 7
+        },
+        {
+          "name": "create",
+          "complexity": 2,
+          "calls": [
+            "BaseError.badRequest",
+            "QuizService.create",
+            "createdResponse"
+          ],
+          "loc": 11
+        },
+        {
+          "name": "update",
+          "complexity": 2,
+          "calls": [
+            "BaseError.badRequest",
+            "QuizService.update",
+            "successResponse"
+          ],
+          "loc": 12
+        },
+        {
+          "name": "delete",
+          "complexity": 1,
+          "calls": [
+            "QuizService.delete",
+            "successResponse"
+          ],
+          "loc": 7
+        }
+      ],
+      "methodCount": 6,
+      "wmc": 8,
+      "avgComplexity": 1.33,
+      "rfc": 15,
+      "cbo": 3,
+      "loc": 64,
+      "extendsName": null,
+      "dit": 1,
+      "noc": 0
+    },
+    {
+      "className": "QuizOptionAnswerController",
+      "filePath": "src/domains/v1/quiz/quiz-option-answer/quiz-option-answer-controller.js",
+      "domain": "quiz",
+      "methods": [
+        {
+          "name": "getAll",
+          "complexity": 1,
+          "calls": [
+            "QuizOptionAnswerService.getAll",
+            "successResponse"
+          ],
+          "loc": 10
+        },
+        {
+          "name": "getById",
+          "complexity": 1,
+          "calls": [
+            "QuizOptionAnswerService.getById",
+            "successResponse"
+          ],
+          "loc": 7
+        },
+        {
+          "name": "create",
+          "complexity": 2,
+          "calls": [
+            "BaseError.badRequest",
+            "QuizOptionAnswerService.create",
+            "createdResponse"
+          ],
+          "loc": 11
+        },
+        {
+          "name": "update",
+          "complexity": 2,
+          "calls": [
+            "BaseError.badRequest",
+            "QuizOptionAnswerService.update",
+            "successResponse"
+          ],
+          "loc": 12
+        },
+        {
+          "name": "delete",
+          "complexity": 1,
+          "calls": [
+            "QuizOptionAnswerService.delete",
+            "successResponse"
+          ],
+          "loc": 7
+        }
+      ],
+      "methodCount": 5,
+      "wmc": 7,
+      "avgComplexity": 1.4,
+      "rfc": 13,
+      "cbo": 3,
+      "loc": 53,
+      "extendsName": null,
+      "dit": 1,
+      "noc": 0
+    },
+    {
+      "className": "QuizOptionAnswerService",
+      "filePath": "src/domains/v1/quiz/quiz-option-answer/quiz-option-answer-service.js",
+      "domain": "quiz",
+      "methods": [
+        {
+          "name": "getAll",
+          "complexity": 5,
+          "calls": [
+            "Math.ceil",
+            "Promise.all",
+            "buildQueryOptions",
+            "this.prisma.QuizOptionAnswer.count",
+            "this.prisma.QuizOptionAnswer.findMany"
+          ],
+          "loc": 30
+        },
+        {
+          "name": "getById",
+          "complexity": 2,
+          "calls": [
+            "BaseError.notFound",
+            "this.prisma.QuizOptionAnswer.findFirst"
+          ],
+          "loc": 13
+        },
+        {
+          "name": "create",
+          "complexity": 3,
+          "calls": [
+            "BaseError.notFound",
+            "this.prisma.QuizOptionAnswer.create",
+            "this.prisma.QuizQuestion.findUnique"
+          ],
+          "loc": 17
+        },
+        {
+          "name": "update",
+          "complexity": 4,
+          "calls": [
+            "BaseError.notFound",
+            "this.prisma.QuizOptionAnswer.findUnique",
+            "this.prisma.QuizOptionAnswer.update"
+          ],
+          "loc": 15
+        },
+        {
+          "name": "delete",
+          "complexity": 2,
+          "calls": [
+            "BaseError.notFound",
+            "this.prisma.QuizOptionAnswer.delete",
+            "this.prisma.QuizOptionAnswer.findUnique"
+          ],
+          "loc": 11
+        }
+      ],
+      "methodCount": 5,
+      "wmc": 16,
+      "avgComplexity": 3.2,
+      "rfc": 17,
+      "cbo": 4,
+      "loc": 96,
+      "extendsName": null,
+      "dit": 1,
+      "noc": 0
+    },
+    {
+      "className": "QuizQuestionController",
+      "filePath": "src/domains/v1/quiz/quiz-question/quiz-question-controller.js",
+      "domain": "quiz",
+      "methods": [
+        {
+          "name": "getAll",
+          "complexity": 1,
+          "calls": [
+            "QuizQuestionService.getAll",
+            "successResponse"
+          ],
+          "loc": 10
+        },
+        {
+          "name": "getById",
+          "complexity": 1,
+          "calls": [
+            "QuizQuestionService.getById",
+            "successResponse"
+          ],
+          "loc": 7
+        },
+        {
+          "name": "create",
+          "complexity": 2,
+          "calls": [
+            "BaseError.badRequest",
+            "QuizQuestionService.create",
+            "createdResponse"
+          ],
+          "loc": 11
+        },
+        {
+          "name": "update",
+          "complexity": 2,
+          "calls": [
+            "BaseError.badRequest",
+            "QuizQuestionService.update",
+            "successResponse"
+          ],
+          "loc": 12
+        },
+        {
+          "name": "delete",
+          "complexity": 1,
+          "calls": [
+            "QuizQuestionService.delete",
+            "successResponse"
+          ],
+          "loc": 7
+        }
+      ],
+      "methodCount": 5,
+      "wmc": 7,
+      "avgComplexity": 1.4,
+      "rfc": 13,
+      "cbo": 3,
+      "loc": 53,
+      "extendsName": null,
+      "dit": 1,
+      "noc": 0
+    },
+    {
+      "className": "QuizQuestionService",
+      "filePath": "src/domains/v1/quiz/quiz-question/quiz-question-service.js",
+      "domain": "quiz",
+      "methods": [
+        {
+          "name": "getAll",
+          "complexity": 5,
+          "calls": [
+            "Math.ceil",
+            "Promise.all",
+            "buildQueryOptions",
+            "this.prisma.QuizQuestion.count",
+            "this.prisma.QuizQuestion.findMany"
+          ],
+          "loc": 36
+        },
+        {
+          "name": "getById",
+          "complexity": 2,
+          "calls": [
+            "BaseError.notFound",
+            "this.prisma.QuizQuestion.findFirst"
+          ],
+          "loc": 18
+        },
+        {
+          "name": "create",
+          "complexity": 5,
+          "calls": [
+            "this.prisma.$transaction",
+            "this.prisma.Quiz.findUnique",
+            "tx.quizQuestion.create",
+            "value.quiz_option_answers.map"
+          ],
+          "loc": 39
+        },
+        {
+          "name": "update",
+          "complexity": 4,
+          "calls": [
+            "BaseError.notFound",
+            "this.prisma.$transaction",
+            "this.prisma.quizQuestion.findUnique",
+            "tx.QuizOptionAnswer.createMany",
+            "tx.QuizOptionAnswer.deleteMany",
+            "tx.quizQuestion.update",
+            "value.quiz_option_answers.map"
+          ],
+          "loc": 42
+        },
+        {
+          "name": "delete",
+          "complexity": 2,
+          "calls": [
+            "BaseError.notFound",
+            "this.prisma.quizQuestion.delete",
+            "this.prisma.quizQuestion.findUnique"
+          ],
+          "loc": 13
+        }
+      ],
+      "methodCount": 5,
+      "wmc": 18,
+      "avgComplexity": 3.6,
+      "rfc": 21,
+      "cbo": 4,
+      "loc": 158,
+      "extendsName": null,
+      "dit": 1,
+      "noc": 0
+    },
+    {
+      "className": "QuizService",
+      "filePath": "src/domains/v1/quiz/quiz-service.js",
+      "domain": "quiz",
+      "methods": [
+        {
+          "name": "getAll",
+          "complexity": 5,
+          "calls": [
+            "Math.ceil",
+            "Promise.all",
+            "buildQueryOptions",
+            "this.prisma.Quiz.count",
+            "this.prisma.Quiz.findMany"
+          ],
+          "loc": 43
+        },
+        {
+          "name": "getAllForStudent",
+          "complexity": 1,
+          "calls": [
+            "this.prisma.quiz.findMany"
+          ],
+          "loc": 35
+        },
+        {
+          "name": "getById",
+          "complexity": 2,
+          "calls": [
+            "BaseError.notFound",
+            "this.prisma.Quiz.findFirst"
+          ],
+          "loc": 17
+        },
+        {
+          "name": "create",
+          "complexity": 9,
+          "calls": [
+            "ScheduleService.create",
+            "console.error",
+            "endTime.toISOString",
+            "startTime.setHours",
+            "startTime.toISOString",
+            "this.prisma.Course.findUnique",
+            "this.prisma.Quiz.create"
+          ],
+          "loc": 77
+        },
+        {
+          "name": "update",
+          "complexity": 9,
+          "calls": [
+            "BaseError.notFound",
+            "this.prisma.Course.findUnique",
+            "this.prisma.Quiz.findUnique",
+            "this.prisma.Quiz.update"
+          ],
+          "loc": 53
+        },
+        {
+          "name": "delete",
+          "complexity": 2,
+          "calls": [
+            "BaseError.notFound",
+            "this.prisma.Quiz.delete",
+            "this.prisma.Quiz.findUnique"
+          ],
+          "loc": 19
+        }
+      ],
+      "methodCount": 6,
+      "wmc": 28,
+      "avgComplexity": 4.67,
+      "rfc": 24,
+      "cbo": 6,
+      "loc": 255,
+      "extendsName": null,
+      "dit": 1,
+      "noc": 0
+    },
+    {
+      "className": "ScheduleController",
+      "filePath": "src/domains/v1/schedule/schedule-controller.js",
+      "domain": "schedule",
+      "methods": [
+        {
+          "name": "getAll",
+          "complexity": 1,
+          "calls": [
+            "ScheduleService.getAll",
+            "successResponse"
+          ],
+          "loc": 10
+        },
+        {
+          "name": "getById",
+          "complexity": 1,
+          "calls": [
+            "ScheduleService.getById",
+            "successResponse"
+          ],
+          "loc": 6
+        },
+        {
+          "name": "create",
+          "complexity": 2,
+          "calls": [
+            "BaseError.badRequest",
+            "ScheduleService.create",
+            "createdResponse"
+          ],
+          "loc": 8
+        },
+        {
+          "name": "update",
+          "complexity": 2,
+          "calls": [
+            "BaseError.badRequest",
+            "ScheduleService.update",
+            "successResponse"
+          ],
+          "loc": 9
+        },
+        {
+          "name": "delete",
+          "complexity": 1,
+          "calls": [
+            "ScheduleService.delete",
+            "successResponse"
+          ],
+          "loc": 6
+        }
+      ],
+      "methodCount": 5,
+      "wmc": 7,
+      "avgComplexity": 1.4,
+      "rfc": 13,
+      "cbo": 3,
+      "loc": 45,
+      "extendsName": null,
+      "dit": 1,
+      "noc": 0
+    },
+    {
+      "className": "ScheduleService",
+      "filePath": "src/domains/v1/schedule/schedule-service.js",
+      "domain": "schedule",
+      "methods": [
+        {
+          "name": "getAll",
+          "complexity": 3,
+          "calls": [
+            "Math.ceil",
+            "Promise.all",
+            "buildQueryOptions",
+            "this.prisma.schedule.count",
+            "this.prisma.schedule.findMany"
+          ],
+          "loc": 27
+        },
+        {
+          "name": "getById",
+          "complexity": 2,
+          "calls": [
+            "BaseError.notFound",
+            "this.prisma.schedule.findFirst"
+          ],
+          "loc": 9
+        },
+        {
+          "name": "create",
+          "complexity": 4,
+          "calls": [
+            "BaseError.forbidden",
+            "this.prisma.course.findFirst",
+            "this.prisma.mentor.findFirst",
+            "this.prisma.schedule.create"
+          ],
+          "loc": 25
+        },
+        {
+          "name": "update",
+          "complexity": 4,
+          "calls": [
+            "BaseError.forbidden",
+            "BaseError.notFound",
+            "this.prisma.mentor.findFirst",
+            "this.prisma.schedule.findFirst",
+            "this.prisma.schedule.update"
+          ],
+          "loc": 25
+        },
+        {
+          "name": "delete",
+          "complexity": 4,
+          "calls": [
+            "BaseError.forbidden",
+            "BaseError.notFound",
+            "this.prisma.mentor.findFirst",
+            "this.prisma.schedule.delete",
+            "this.prisma.schedule.findFirst"
+          ],
+          "loc": 27
+        }
+      ],
+      "methodCount": 5,
+      "wmc": 17,
+      "avgComplexity": 3.4,
+      "rfc": 18,
+      "cbo": 5,
+      "loc": 123,
+      "extendsName": null,
+      "dit": 1,
+      "noc": 0
+    },
+    {
+      "className": "UserController",
+      "filePath": "src/domains/v1/user/user-controller.js",
+      "domain": "user",
+      "methods": [
+        {
+          "name": "getAll",
+          "complexity": 2,
+          "calls": [
+            "UserService.getAll",
+            "successResponse"
+          ],
+          "loc": 9
+        },
+        {
+          "name": "getById",
+          "complexity": 1,
+          "calls": [
+            "UserService.getById",
+            "successResponse"
+          ],
+          "loc": 5
+        },
+        {
+          "name": "create",
+          "complexity": 1,
+          "calls": [
+            "UserService.create",
+            "createdResponse"
+          ],
+          "loc": 4
+        },
+        {
+          "name": "update",
+          "complexity": 4,
+          "calls": [
+            "BaseError.forbidden",
+            "BaseError.unauthorized",
+            "UserService.update",
+            "updatedResponse"
+          ],
+          "loc": 13
+        },
+        {
+          "name": "remove",
+          "complexity": 1,
+          "calls": [
+            "UserService.remove",
+            "successResponse"
+          ],
+          "loc": 5
+        }
+      ],
+      "methodCount": 5,
+      "wmc": 9,
+      "avgComplexity": 1.8,
+      "rfc": 15,
+      "cbo": 4,
+      "loc": 44,
+      "extendsName": null,
+      "dit": 1,
+      "noc": 0
+    },
+    {
+      "className": "UserService",
+      "filePath": "src/domains/v1/user/user-service.js",
+      "domain": "user",
+      "methods": [
+        {
+          "name": "getAll",
+          "complexity": 1,
+          "calls": [
+            "Math.ceil",
+            "Promise.all",
+            "buildQueryOptions",
+            "this.prisma.user.count",
+            "this.prisma.user.findMany"
+          ],
+          "loc": 25
+        },
+        {
+          "name": "getById",
+          "complexity": 2,
+          "calls": [
+            "BaseError.notFound",
+            "this.prisma.user.findUnique"
+          ],
+          "loc": 5
+        },
+        {
+          "name": "create",
+          "complexity": 2,
+          "calls": [
+            "BaseError.duplicate",
+            "hashPassword",
+            "this.prisma.user.create",
+            "this.prisma.user.findFirst"
+          ],
+          "loc": 15
+        },
+        {
+          "name": "update",
+          "complexity": 12,
+          "calls": [
+            "BaseError.duplicate",
+            "BaseError.notFound",
+            "console.warn",
+            "hashPassword",
+            "this.cloudinary.deleteFromUrlsCloudinary",
+            "this.cloudinary.uploadFromBufferToCloudinary",
+            "this.prisma.user.findFirst",
+            "this.prisma.user.findUnique",
+            "this.prisma.user.update"
+          ],
+          "loc": 54
+        },
+        {
+          "name": "remove",
+          "complexity": 2,
+          "calls": [
+            "BaseError.notFound",
+            "this.prisma.user.findUnique",
+            "this.prisma.user.update"
+          ],
+          "loc": 7
+        }
+      ],
+      "methodCount": 5,
+      "wmc": 19,
+      "avgComplexity": 3.8,
+      "rfc": 20,
+      "cbo": 6,
+      "loc": 119,
+      "extendsName": null,
+      "dit": 1,
+      "noc": 0
+    }
+  ],
+  "endpoints": [
+    {
+      "domain": "auth",
+      "filePath": "src/domains/v1/auth/auth-routes.js",
+      "method": "POST",
+      "path": "/login",
+      "handlers": [
+        "validateCredentials()",
+        "tryCatch()"
+      ],
+      "controllerMethods": [
+        {
+          "className": "AuthController",
+          "methodName": "login",
+          "complexity": 2
+        }
+      ],
+      "cyclomaticComplexity": 2
+    },
+    {
+      "domain": "auth",
+      "filePath": "src/domains/v1/auth/auth-routes.js",
+      "method": "GET",
+      "path": "/me",
+      "handlers": [
+        "authTokenMiddleware.authenticate",
+        "tryCatch()"
+      ],
+      "controllerMethods": [
+        {
+          "className": "AuthController",
+          "methodName": "me",
+          "complexity": 2
+        }
+      ],
+      "cyclomaticComplexity": 2
+    },
+    {
+      "domain": "auth",
+      "filePath": "src/domains/v1/auth/auth-routes.js",
+      "method": "POST",
+      "path": "/refresh-token",
+      "handlers": [
+        "tryCatch()"
+      ],
+      "controllerMethods": [
+        {
+          "className": "AuthController",
+          "methodName": "refreshToken",
+          "complexity": 2
+        }
+      ],
+      "cyclomaticComplexity": 2
+    },
+    {
+      "domain": "auth",
+      "filePath": "src/domains/v1/auth/auth-routes.js",
+      "method": "POST",
+      "path": "/register",
+      "handlers": [
+        "uploadFile().single()",
+        "validateCredentials()",
+        "tryCatch()"
+      ],
+      "controllerMethods": [
+        {
+          "className": "AuthController",
+          "methodName": "register",
+          "complexity": 2
+        }
+      ],
+      "cyclomaticComplexity": 2
+    },
+    {
+      "domain": "course",
+      "filePath": "src/domains/v1/course/course-enrollment/course-enrollment-routes.js",
+      "method": "GET",
+      "path": "/",
+      "handlers": [
+        "authTokenMiddleware.authenticate",
+        "validateQueryParamsCredentials()",
+        "tryCatch()"
+      ],
+      "controllerMethods": [
+        {
+          "className": "CourseEnrollmentController",
+          "methodName": "getAll",
+          "complexity": 1
+        }
+      ],
+      "cyclomaticComplexity": 1
+    },
+    {
+      "domain": "course",
+      "filePath": "src/domains/v1/course/course-enrollment/course-enrollment-routes.js",
+      "method": "POST",
+      "path": "/",
+      "handlers": [
+        "authTokenMiddleware.authenticate",
+        "authTokenMiddleware.authorizeRoles()",
+        "validateCredentials()",
+        "tryCatch()"
+      ],
+      "controllerMethods": [
+        {
+          "className": "CourseEnrollmentController",
+          "methodName": "create",
+          "complexity": 2
+        }
+      ],
+      "cyclomaticComplexity": 2
+    },
+    {
+      "domain": "course",
+      "filePath": "src/domains/v1/course/course-routes.js",
+      "method": "GET",
+      "path": "/",
+      "handlers": [
+        "validateQueryParamsCredentials()",
+        "tryCatch()"
+      ],
+      "controllerMethods": [
+        {
+          "className": "CourseController",
+          "methodName": "getAll",
+          "complexity": 2
+        }
+      ],
+      "cyclomaticComplexity": 2
+    },
+    {
+      "domain": "course",
+      "filePath": "src/domains/v1/course/course-routes.js",
+      "method": "POST",
+      "path": "/",
+      "handlers": [
+        "authMiddleware.authenticate",
+        "authMiddleware.authorizeRoles()",
+        "uploadFile().single()",
+        "validateCredentials()",
+        "tryCatch()"
+      ],
+      "controllerMethods": [
+        {
+          "className": "CourseController",
+          "methodName": "create",
+          "complexity": 4
+        }
+      ],
+      "cyclomaticComplexity": 4
+    },
+    {
+      "domain": "course",
+      "filePath": "src/domains/v1/course/course-routes.js",
+      "method": "DELETE",
+      "path": "/:id",
+      "handlers": [
+        "authMiddleware.authenticate",
+        "authMiddleware.authorizeRoles()",
+        "tryCatch()"
+      ],
+      "controllerMethods": [
+        {
+          "className": "CourseController",
+          "methodName": "delete",
+          "complexity": 1
+        }
+      ],
+      "cyclomaticComplexity": 1
+    },
+    {
+      "domain": "course",
+      "filePath": "src/domains/v1/course/course-routes.js",
+      "method": "GET",
+      "path": "/:id",
+      "handlers": [
+        "tryCatch()"
+      ],
+      "controllerMethods": [
+        {
+          "className": "CourseController",
+          "methodName": "getById",
+          "complexity": 1
+        }
+      ],
+      "cyclomaticComplexity": 1
+    },
+    {
+      "domain": "course",
+      "filePath": "src/domains/v1/course/course-routes.js",
+      "method": "PATCH",
+      "path": "/:id",
+      "handlers": [
+        "authMiddleware.authenticate",
+        "authMiddleware.authorizeRoles()",
+        "uploadFile().single()",
+        "validateCredentials()",
+        "tryCatch()"
+      ],
+      "controllerMethods": [
+        {
+          "className": "CourseController",
+          "methodName": "update",
+          "complexity": 5
+        }
+      ],
+      "cyclomaticComplexity": 5
+    },
+    {
+      "domain": "course",
+      "filePath": "src/domains/v1/course/course-routes.js",
+      "method": "GET",
+      "path": "/me",
+      "handlers": [
+        "authMiddleware.authenticate",
+        "authMiddleware.authorizeRoles()",
+        "tryCatch()"
+      ],
+      "controllerMethods": [
+        {
+          "className": "CourseController",
+          "methodName": "getAllMe",
+          "complexity": 1
+        }
+      ],
+      "cyclomaticComplexity": 1
+    },
+    {
+      "domain": "course",
+      "filePath": "src/domains/v1/course/course-transaction/course-transaction-routes.js",
+      "method": "GET",
+      "path": "/",
+      "handlers": [
+        "authTokenMiddleware.authenticate",
+        "validateQueryParamsCredentials()",
+        "tryCatch()"
+      ],
+      "controllerMethods": [
+        {
+          "className": "CourseTransactionController",
+          "methodName": "getAll",
+          "complexity": 1
+        }
+      ],
+      "cyclomaticComplexity": 1
+    },
+    {
+      "domain": "course",
+      "filePath": "src/domains/v1/course/course-transaction/course-transaction-routes.js",
+      "method": "POST",
+      "path": "/",
+      "handlers": [
+        "authTokenMiddleware.authenticate",
+        "authTokenMiddleware.authorizeRoles()",
+        "validateCredentials()",
+        "tryCatch()"
+      ],
+      "controllerMethods": [
+        {
+          "className": "CourseTransactionController",
+          "methodName": "create",
+          "complexity": 2
+        }
+      ],
+      "cyclomaticComplexity": 2
+    },
+    {
+      "domain": "course",
+      "filePath": "src/domains/v1/course/course-transaction/course-transaction-routes.js",
+      "method": "POST",
+      "path": "/notify",
+      "handlers": [
+        "tryCatch()"
+      ],
+      "controllerMethods": [
+        {
+          "className": "CourseTransactionController",
+          "methodName": "notify",
+          "complexity": 2
+        }
+      ],
+      "cyclomaticComplexity": 2
+    },
+    {
+      "domain": "mentor",
+      "filePath": "src/domains/v1/mentor/mentor-routes.js",
+      "method": "GET",
+      "path": "/",
+      "handlers": [
+        "authTokenMiddleware.authenticate",
+        "authTokenMiddleware.authorizeRoles()",
+        "validateQueryParamsCredentials()",
+        "tryCatch()"
+      ],
+      "controllerMethods": [
+        {
+          "className": "MentorController",
+          "methodName": "getAll",
+          "complexity": 2
+        }
+      ],
+      "cyclomaticComplexity": 2
+    },
+    {
+      "domain": "mentor",
+      "filePath": "src/domains/v1/mentor/mentor-routes.js",
+      "method": "POST",
+      "path": "/",
+      "handlers": [
+        "authTokenMiddleware.authenticate",
+        "authTokenMiddleware.authorizeRoles()",
+        "validateCredentials()",
+        "tryCatch()"
+      ],
+      "controllerMethods": [
+        {
+          "className": "MentorController",
+          "methodName": "create",
+          "complexity": 2
+        }
+      ],
+      "cyclomaticComplexity": 2
+    },
+    {
+      "domain": "mentor",
+      "filePath": "src/domains/v1/mentor/mentor-routes.js",
+      "method": "DELETE",
+      "path": "/:id",
+      "handlers": [
+        "authTokenMiddleware.authenticate",
+        "authTokenMiddleware.authorizeRoles()",
+        "tryCatch()"
+      ],
+      "controllerMethods": [
+        {
+          "className": "MentorController",
+          "methodName": "delete",
+          "complexity": 1
+        }
+      ],
+      "cyclomaticComplexity": 1
+    },
+    {
+      "domain": "mentor",
+      "filePath": "src/domains/v1/mentor/mentor-routes.js",
+      "method": "GET",
+      "path": "/:id",
+      "handlers": [
+        "authTokenMiddleware.authenticate",
+        "authTokenMiddleware.authorizeRoles()",
+        "tryCatch()"
+      ],
+      "controllerMethods": [
+        {
+          "className": "MentorController",
+          "methodName": "getById",
+          "complexity": 1
+        }
+      ],
+      "cyclomaticComplexity": 1
+    },
+    {
+      "domain": "mentor",
+      "filePath": "src/domains/v1/mentor/mentor-routes.js",
+      "method": "PATCH",
+      "path": "/:id",
+      "handlers": [
+        "authTokenMiddleware.authenticate",
+        "authTokenMiddleware.authorizeRoles()",
+        "validateCredentials()",
+        "tryCatch()"
+      ],
+      "controllerMethods": [
+        {
+          "className": "MentorController",
+          "methodName": "update",
+          "complexity": 2
+        }
+      ],
+      "cyclomaticComplexity": 2
+    },
+    {
+      "domain": "modul",
+      "filePath": "src/domains/v1/modul/modul-routes.js",
+      "method": "GET",
+      "path": "/",
+      "handlers": [
+        "validateQueryParamsCredentials()",
+        "authTokenMiddleware.authenticate",
+        "tryCatch()"
+      ],
+      "controllerMethods": [
+        {
+          "className": "ModulController",
+          "methodName": "getAll",
+          "complexity": 1
+        }
+      ],
+      "cyclomaticComplexity": 1
+    },
+    {
+      "domain": "modul",
+      "filePath": "src/domains/v1/modul/modul-routes.js",
+      "method": "POST",
+      "path": "/",
+      "handlers": [
+        "authTokenMiddleware.authenticate",
+        "uploadFile().single()",
+        "validateCredentials()",
+        "tryCatch()"
+      ],
+      "controllerMethods": [
+        {
+          "className": "ModulController",
+          "methodName": "create",
+          "complexity": 3
+        }
+      ],
+      "cyclomaticComplexity": 3
+    },
+    {
+      "domain": "modul",
+      "filePath": "src/domains/v1/modul/modul-routes.js",
+      "method": "DELETE",
+      "path": "/:id",
+      "handlers": [
+        "authTokenMiddleware.authenticate",
+        "tryCatch()"
+      ],
+      "controllerMethods": [
+        {
+          "className": "ModulController",
+          "methodName": "remove",
+          "complexity": 2
+        }
+      ],
+      "cyclomaticComplexity": 2
+    },
+    {
+      "domain": "modul",
+      "filePath": "src/domains/v1/modul/modul-routes.js",
+      "method": "GET",
+      "path": "/:id",
+      "handlers": [
+        "authTokenMiddleware.authenticate",
+        "tryCatch()"
+      ],
+      "controllerMethods": [
+        {
+          "className": "ModulController",
+          "methodName": "getById",
+          "complexity": 3
+        }
+      ],
+      "cyclomaticComplexity": 3
+    },
+    {
+      "domain": "modul",
+      "filePath": "src/domains/v1/modul/modul-routes.js",
+      "method": "PUT",
+      "path": "/:id",
+      "handlers": [
+        "authTokenMiddleware.authenticate",
+        "uploadFile().single()",
+        "validateCredentials()",
+        "tryCatch()"
+      ],
+      "controllerMethods": [
+        {
+          "className": "ModulController",
+          "methodName": "update",
+          "complexity": 3
+        }
+      ],
+      "cyclomaticComplexity": 3
+    },
+    {
+      "domain": "quiz",
+      "filePath": "src/domains/v1/quiz/quiz-attempt-question-answer/quiz-attempt-question-answer-routes.js",
+      "method": "GET",
+      "path": "/",
+      "handlers": [
+        "authTokenMiddleware.authenticate",
+        "validateQueryParamsCredentials()",
+        "tryCatch()"
+      ],
+      "controllerMethods": [
+        {
+          "className": "QuizAttemptQuestionAnswerController",
+          "methodName": "getAll",
+          "complexity": 1
+        }
+      ],
+      "cyclomaticComplexity": 1
+    },
+    {
+      "domain": "quiz",
+      "filePath": "src/domains/v1/quiz/quiz-attempt-question-answer/quiz-attempt-question-answer-routes.js",
+      "method": "POST",
+      "path": "/",
+      "handlers": [
+        "authTokenMiddleware.authenticate",
+        "validateCredentials()",
+        "tryCatch()"
+      ],
+      "controllerMethods": [
+        {
+          "className": "QuizAttemptQuestionAnswerController",
+          "methodName": "create",
+          "complexity": 2
+        }
+      ],
+      "cyclomaticComplexity": 2
+    },
+    {
+      "domain": "quiz",
+      "filePath": "src/domains/v1/quiz/quiz-attempt-question-answer/quiz-attempt-question-answer-routes.js",
+      "method": "DELETE",
+      "path": "/:id",
+      "handlers": [
+        "authTokenMiddleware.authenticate",
+        "validateParams()",
+        "validateQueryParamsCredentials()",
+        "tryCatch()"
+      ],
+      "controllerMethods": [
+        {
+          "className": "QuizAttemptQuestionAnswerController",
+          "methodName": "delete",
+          "complexity": 1
+        }
+      ],
+      "cyclomaticComplexity": 1
+    },
+    {
+      "domain": "quiz",
+      "filePath": "src/domains/v1/quiz/quiz-attempt-question-answer/quiz-attempt-question-answer-routes.js",
+      "method": "GET",
+      "path": "/:id",
+      "handlers": [
+        "validateParams()",
+        "tryCatch()"
+      ],
+      "controllerMethods": [
+        {
+          "className": "QuizAttemptQuestionAnswerController",
+          "methodName": "getById",
+          "complexity": 1
+        }
+      ],
+      "cyclomaticComplexity": 1
+    },
+    {
+      "domain": "quiz",
+      "filePath": "src/domains/v1/quiz/quiz-attempt-question-answer/quiz-attempt-question-answer-routes.js",
+      "method": "PATCH",
+      "path": "/:id",
+      "handlers": [
+        "authTokenMiddleware.authenticate",
+        "validateParams()",
+        "validateCredentials()",
+        "tryCatch()"
+      ],
+      "controllerMethods": [
+        {
+          "className": "QuizAttemptQuestionAnswerController",
+          "methodName": "update",
+          "complexity": 2
+        }
+      ],
+      "cyclomaticComplexity": 2
+    },
+    {
+      "domain": "quiz",
+      "filePath": "src/domains/v1/quiz/quiz-attempt/quiz-attempt-routes.js",
+      "method": "GET",
+      "path": "/",
+      "handlers": [
+        "authTokenMiddleware.authenticate",
+        "validateQueryParamsCredentials()",
+        "tryCatch()"
+      ],
+      "controllerMethods": [
+        {
+          "className": "QuizAttemptController",
+          "methodName": "getAll",
+          "complexity": 1
+        }
+      ],
+      "cyclomaticComplexity": 1
+    },
+    {
+      "domain": "quiz",
+      "filePath": "src/domains/v1/quiz/quiz-attempt/quiz-attempt-routes.js",
+      "method": "POST",
+      "path": "/",
+      "handlers": [
+        "authTokenMiddleware.authenticate",
+        "validateCredentials()",
+        "tryCatch()"
+      ],
+      "controllerMethods": [
+        {
+          "className": "QuizAttemptController",
+          "methodName": "create",
+          "complexity": 2
+        }
+      ],
+      "cyclomaticComplexity": 2
+    },
+    {
+      "domain": "quiz",
+      "filePath": "src/domains/v1/quiz/quiz-attempt/quiz-attempt-routes.js",
+      "method": "DELETE",
+      "path": "/:id",
+      "handlers": [
+        "authTokenMiddleware.authenticate",
+        "validateQueryParamsCredentials()",
+        "tryCatch()"
+      ],
+      "controllerMethods": [
+        {
+          "className": "QuizAttemptController",
+          "methodName": "delete",
+          "complexity": 1
+        }
+      ],
+      "cyclomaticComplexity": 1
+    },
+    {
+      "domain": "quiz",
+      "filePath": "src/domains/v1/quiz/quiz-attempt/quiz-attempt-routes.js",
+      "method": "GET",
+      "path": "/:id",
+      "handlers": [
+        "authTokenMiddleware.authenticate",
+        "tryCatch()"
+      ],
+      "controllerMethods": [
+        {
+          "className": "QuizAttemptController",
+          "methodName": "getById",
+          "complexity": 1
+        }
+      ],
+      "cyclomaticComplexity": 1
+    },
+    {
+      "domain": "quiz",
+      "filePath": "src/domains/v1/quiz/quiz-attempt/quiz-attempt-routes.js",
+      "method": "PATCH",
+      "path": "/:id",
+      "handlers": [
+        "authTokenMiddleware.authenticate",
+        "validateCredentials()",
+        "tryCatch()"
+      ],
+      "controllerMethods": [
+        {
+          "className": "QuizAttemptController",
+          "methodName": "update",
+          "complexity": 2
+        }
+      ],
+      "cyclomaticComplexity": 2
+    },
+    {
+      "domain": "quiz",
+      "filePath": "src/domains/v1/quiz/quiz-option-answer/quiz-option-answer-routes.js",
+      "method": "GET",
+      "path": "/",
+      "handlers": [
+        "authTokenMiddleware.authenticate",
+        "validateQueryParamsCredentials()",
+        "tryCatch()"
+      ],
+      "controllerMethods": [
+        {
+          "className": "QuizOptionAnswerController",
+          "methodName": "getAll",
+          "complexity": 1
+        }
+      ],
+      "cyclomaticComplexity": 1
+    },
+    {
+      "domain": "quiz",
+      "filePath": "src/domains/v1/quiz/quiz-option-answer/quiz-option-answer-routes.js",
+      "method": "POST",
+      "path": "/",
+      "handlers": [
+        "authTokenMiddleware.authenticate",
+        "validateCredentials()",
+        "tryCatch()"
+      ],
+      "controllerMethods": [
+        {
+          "className": "QuizOptionAnswerController",
+          "methodName": "create",
+          "complexity": 2
+        }
+      ],
+      "cyclomaticComplexity": 2
+    },
+    {
+      "domain": "quiz",
+      "filePath": "src/domains/v1/quiz/quiz-option-answer/quiz-option-answer-routes.js",
+      "method": "DELETE",
+      "path": "/:id",
+      "handlers": [
+        "authTokenMiddleware.authenticate",
+        "validateParams()",
+        "validateQueryParamsCredentials()",
+        "tryCatch()"
+      ],
+      "controllerMethods": [
+        {
+          "className": "QuizOptionAnswerController",
+          "methodName": "delete",
+          "complexity": 1
+        }
+      ],
+      "cyclomaticComplexity": 1
+    },
+    {
+      "domain": "quiz",
+      "filePath": "src/domains/v1/quiz/quiz-option-answer/quiz-option-answer-routes.js",
+      "method": "GET",
+      "path": "/:id",
+      "handlers": [
+        "validateParams()",
+        "tryCatch()"
+      ],
+      "controllerMethods": [
+        {
+          "className": "QuizOptionAnswerController",
+          "methodName": "getById",
+          "complexity": 1
+        }
+      ],
+      "cyclomaticComplexity": 1
+    },
+    {
+      "domain": "quiz",
+      "filePath": "src/domains/v1/quiz/quiz-option-answer/quiz-option-answer-routes.js",
+      "method": "PATCH",
+      "path": "/:id",
+      "handlers": [
+        "authTokenMiddleware.authenticate",
+        "validateParams()",
+        "validateCredentials()",
+        "tryCatch()"
+      ],
+      "controllerMethods": [
+        {
+          "className": "QuizOptionAnswerController",
+          "methodName": "update",
+          "complexity": 2
+        }
+      ],
+      "cyclomaticComplexity": 2
+    },
+    {
+      "domain": "quiz",
+      "filePath": "src/domains/v1/quiz/quiz-question/quiz-question-routes.js",
+      "method": "GET",
+      "path": "/",
+      "handlers": [
+        "authTokenMiddleware.authenticate",
+        "validateQueryParamsCredentials()",
+        "tryCatch()"
+      ],
+      "controllerMethods": [
+        {
+          "className": "QuizQuestionController",
+          "methodName": "getAll",
+          "complexity": 1
+        }
+      ],
+      "cyclomaticComplexity": 1
+    },
+    {
+      "domain": "quiz",
+      "filePath": "src/domains/v1/quiz/quiz-question/quiz-question-routes.js",
+      "method": "POST",
+      "path": "/",
+      "handlers": [
+        "authTokenMiddleware.authenticate",
+        "validateCredentials()",
+        "tryCatch()"
+      ],
+      "controllerMethods": [
+        {
+          "className": "QuizQuestionController",
+          "methodName": "create",
+          "complexity": 2
+        }
+      ],
+      "cyclomaticComplexity": 2
+    },
+    {
+      "domain": "quiz",
+      "filePath": "src/domains/v1/quiz/quiz-question/quiz-question-routes.js",
+      "method": "DELETE",
+      "path": "/:id",
+      "handlers": [
+        "authTokenMiddleware.authenticate",
+        "validateParams()",
+        "validateQueryParamsCredentials()",
+        "tryCatch()"
+      ],
+      "controllerMethods": [
+        {
+          "className": "QuizQuestionController",
+          "methodName": "delete",
+          "complexity": 1
+        }
+      ],
+      "cyclomaticComplexity": 1
+    },
+    {
+      "domain": "quiz",
+      "filePath": "src/domains/v1/quiz/quiz-question/quiz-question-routes.js",
+      "method": "GET",
+      "path": "/:id",
+      "handlers": [
+        "validateParams()",
+        "tryCatch()"
+      ],
+      "controllerMethods": [
+        {
+          "className": "QuizQuestionController",
+          "methodName": "getById",
+          "complexity": 1
+        }
+      ],
+      "cyclomaticComplexity": 1
+    },
+    {
+      "domain": "quiz",
+      "filePath": "src/domains/v1/quiz/quiz-question/quiz-question-routes.js",
+      "method": "PATCH",
+      "path": "/:id",
+      "handlers": [
+        "authTokenMiddleware.authenticate",
+        "validateParams()",
+        "validateCredentials()",
+        "tryCatch()"
+      ],
+      "controllerMethods": [
+        {
+          "className": "QuizQuestionController",
+          "methodName": "update",
+          "complexity": 2
+        }
+      ],
+      "cyclomaticComplexity": 2
+    },
+    {
+      "domain": "quiz",
+      "filePath": "src/domains/v1/quiz/quiz-routes.js",
+      "method": "GET",
+      "path": "/",
+      "handlers": [
+        "authTokenMiddleware.authenticate",
+        "validateQueryParamsCredentials()",
+        "tryCatch()"
+      ],
+      "controllerMethods": [
+        {
+          "className": "QuizController",
+          "methodName": "getAll",
+          "complexity": 1
+        }
+      ],
+      "cyclomaticComplexity": 1
+    },
+    {
+      "domain": "quiz",
+      "filePath": "src/domains/v1/quiz/quiz-routes.js",
+      "method": "POST",
+      "path": "/",
+      "handlers": [
+        "authTokenMiddleware.authenticate",
+        "validateCredentials()",
+        "tryCatch()"
+      ],
+      "controllerMethods": [
+        {
+          "className": "QuizController",
+          "methodName": "create",
+          "complexity": 2
+        }
+      ],
+      "cyclomaticComplexity": 2
+    },
+    {
+      "domain": "quiz",
+      "filePath": "src/domains/v1/quiz/quiz-routes.js",
+      "method": "DELETE",
+      "path": "/:id",
+      "handlers": [
+        "authTokenMiddleware.authenticate",
+        "validateQueryParamsCredentials()",
+        "tryCatch()"
+      ],
+      "controllerMethods": [
+        {
+          "className": "QuizController",
+          "methodName": "delete",
+          "complexity": 1
+        }
+      ],
+      "cyclomaticComplexity": 1
+    },
+    {
+      "domain": "quiz",
+      "filePath": "src/domains/v1/quiz/quiz-routes.js",
+      "method": "GET",
+      "path": "/:id",
+      "handlers": [
+        "tryCatch()"
+      ],
+      "controllerMethods": [
+        {
+          "className": "QuizController",
+          "methodName": "getById",
+          "complexity": 1
+        }
+      ],
+      "cyclomaticComplexity": 1
+    },
+    {
+      "domain": "quiz",
+      "filePath": "src/domains/v1/quiz/quiz-routes.js",
+      "method": "PATCH",
+      "path": "/:id",
+      "handlers": [
+        "authTokenMiddleware.authenticate",
+        "validateCredentials()",
+        "tryCatch()"
+      ],
+      "controllerMethods": [
+        {
+          "className": "QuizController",
+          "methodName": "update",
+          "complexity": 2
+        }
+      ],
+      "cyclomaticComplexity": 2
+    },
+    {
+      "domain": "quiz",
+      "filePath": "src/domains/v1/quiz/quiz-routes.js",
+      "method": "USE",
+      "path": "/attempt",
+      "handlers": [
+        "QuizAttemptRoutes"
+      ],
+      "controllerMethods": [],
+      "cyclomaticComplexity": 0
+    },
+    {
+      "domain": "quiz",
+      "filePath": "src/domains/v1/quiz/quiz-routes.js",
+      "method": "USE",
+      "path": "/attemptQuestionAnswer",
+      "handlers": [
+        "QuizAttemptQuestionAnswerRoutes"
+      ],
+      "controllerMethods": [],
+      "cyclomaticComplexity": 0
+    },
+    {
+      "domain": "quiz",
+      "filePath": "src/domains/v1/quiz/quiz-routes.js",
+      "method": "GET",
+      "path": "/me/active",
+      "handlers": [
+        "authTokenMiddleware.authenticate",
+        "authTokenMiddleware.authorizeRoles()",
+        "tryCatch()"
+      ],
+      "controllerMethods": [
+        {
+          "className": "QuizController",
+          "methodName": "getAllForStudent",
+          "complexity": 1
+        }
+      ],
+      "cyclomaticComplexity": 1
+    },
+    {
+      "domain": "quiz",
+      "filePath": "src/domains/v1/quiz/quiz-routes.js",
+      "method": "USE",
+      "path": "/optionAnswer",
+      "handlers": [
+        "QuizOptionAnswerRoutes"
+      ],
+      "controllerMethods": [],
+      "cyclomaticComplexity": 0
+    },
+    {
+      "domain": "quiz",
+      "filePath": "src/domains/v1/quiz/quiz-routes.js",
+      "method": "USE",
+      "path": "/question",
+      "handlers": [
+        "QuizQuestionRoutes"
+      ],
+      "controllerMethods": [],
+      "cyclomaticComplexity": 0
+    },
+    {
+      "domain": "schedule",
+      "filePath": "src/domains/v1/schedule/schedule-routes.js",
+      "method": "GET",
+      "path": "/",
+      "handlers": [
+        "authTokenMiddleware.authenticate",
+        "validateQueryParamsCredentials()",
+        "tryCatch()"
+      ],
+      "controllerMethods": [
+        {
+          "className": "ScheduleController",
+          "methodName": "getAll",
+          "complexity": 1
+        }
+      ],
+      "cyclomaticComplexity": 1
+    },
+    {
+      "domain": "schedule",
+      "filePath": "src/domains/v1/schedule/schedule-routes.js",
+      "method": "POST",
+      "path": "/",
+      "handlers": [
+        "authTokenMiddleware.authenticate",
+        "validateCredentials()",
+        "tryCatch()"
+      ],
+      "controllerMethods": [
+        {
+          "className": "ScheduleController",
+          "methodName": "create",
+          "complexity": 2
+        }
+      ],
+      "cyclomaticComplexity": 2
+    },
+    {
+      "domain": "schedule",
+      "filePath": "src/domains/v1/schedule/schedule-routes.js",
+      "method": "DELETE",
+      "path": "/:id",
+      "handlers": [
+        "authTokenMiddleware.authenticate",
+        "tryCatch()"
+      ],
+      "controllerMethods": [
+        {
+          "className": "ScheduleController",
+          "methodName": "delete",
+          "complexity": 1
+        }
+      ],
+      "cyclomaticComplexity": 1
+    },
+    {
+      "domain": "schedule",
+      "filePath": "src/domains/v1/schedule/schedule-routes.js",
+      "method": "GET",
+      "path": "/:id",
+      "handlers": [
+        "authTokenMiddleware.authenticate",
+        "tryCatch()"
+      ],
+      "controllerMethods": [
+        {
+          "className": "ScheduleController",
+          "methodName": "getById",
+          "complexity": 1
+        }
+      ],
+      "cyclomaticComplexity": 1
+    },
+    {
+      "domain": "schedule",
+      "filePath": "src/domains/v1/schedule/schedule-routes.js",
+      "method": "PATCH",
+      "path": "/:id",
+      "handlers": [
+        "authTokenMiddleware.authenticate",
+        "validateCredentials()",
+        "tryCatch()"
+      ],
+      "controllerMethods": [
+        {
+          "className": "ScheduleController",
+          "methodName": "update",
+          "complexity": 2
+        }
+      ],
+      "cyclomaticComplexity": 2
+    },
+    {
+      "domain": "user",
+      "filePath": "src/domains/v1/user/user-routes.js",
+      "method": "GET",
+      "path": "/",
+      "handlers": [
+        "authTokenMiddleware.authenticate",
+        "authTokenMiddleware.authorizeRoles()",
+        "validateQueryParamsCredentials()",
+        "tryCatch()"
+      ],
+      "controllerMethods": [
+        {
+          "className": "UserController",
+          "methodName": "getAll",
+          "complexity": 2
+        }
+      ],
+      "cyclomaticComplexity": 2
+    },
+    {
+      "domain": "user",
+      "filePath": "src/domains/v1/user/user-routes.js",
+      "method": "POST",
+      "path": "/",
+      "handlers": [
+        "authTokenMiddleware.authenticate",
+        "authTokenMiddleware.authorizeRoles()",
+        "validateCredentials()",
+        "tryCatch()"
+      ],
+      "controllerMethods": [
+        {
+          "className": "UserController",
+          "methodName": "create",
+          "complexity": 1
+        }
+      ],
+      "cyclomaticComplexity": 1
+    },
+    {
+      "domain": "user",
+      "filePath": "src/domains/v1/user/user-routes.js",
+      "method": "DELETE",
+      "path": "/:id",
+      "handlers": [
+        "authTokenMiddleware.authenticate",
+        "authTokenMiddleware.authorizeRoles()",
+        "tryCatch()"
+      ],
+      "controllerMethods": [
+        {
+          "className": "UserController",
+          "methodName": "remove",
+          "complexity": 1
+        }
+      ],
+      "cyclomaticComplexity": 1
+    },
+    {
+      "domain": "user",
+      "filePath": "src/domains/v1/user/user-routes.js",
+      "method": "GET",
+      "path": "/:id",
+      "handlers": [
+        "authTokenMiddleware.authenticate",
+        "authTokenMiddleware.authorizeRoles()",
+        "tryCatch()"
+      ],
+      "controllerMethods": [
+        {
+          "className": "UserController",
+          "methodName": "getById",
+          "complexity": 1
+        }
+      ],
+      "cyclomaticComplexity": 1
+    },
+    {
+      "domain": "user",
+      "filePath": "src/domains/v1/user/user-routes.js",
+      "method": "PATCH",
+      "path": "/:id",
+      "handlers": [
+        "authTokenMiddleware.authenticate",
+        "authTokenMiddleware.authorizeRoles()",
+        "uploadFile().single()",
+        "validateCredentials()",
+        "tryCatch()"
+      ],
+      "controllerMethods": [
+        {
+          "className": "UserController",
+          "methodName": "update",
+          "complexity": 4
+        }
+      ],
+      "cyclomaticComplexity": 4
+    }
+  ]
+}

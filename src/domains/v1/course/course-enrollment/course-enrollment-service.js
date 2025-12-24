@@ -14,7 +14,20 @@ class CourseEnrollmentService {
     const options = buildQueryOptions(courseEnrollmentQueryConfig, query);
 
     if (user.role === Role.STUDENT) {
-      options.where.user_id = user.id;
+      if (options.where.course_id) {
+        const enrollment = await this.prisma.courseEnrollment.findFirst({
+          where: {
+            user_id: user.id,
+            course_id: options.where.course_id,
+          },
+        });
+
+        if (!enrollment) {
+          throw BaseError.forbidden("You are not enrolled in this course.");
+        }
+      } else {
+        options.where.user_id = user.id;
+      }
     }
 
     const [data, count] = await Promise.all([

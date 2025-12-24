@@ -2,6 +2,8 @@ import { PrismaService } from "../../../common/services/prisma-service.js";
 import { buildQueryOptions } from "../../../utils/buildQueryOptions.js";
 import BaseError from "../../../base-classes/base-error.js";
 import mentorQueryConfig from "./mentor-query-config.js";
+import MentorStatus from "../../../common/enums/mentor-status-enum.js";
+import CourseEnrollmentRole from "../../../common/enums/course-enrollment-role-enum.js";
 
 class MentorService {
   constructor() {
@@ -67,7 +69,34 @@ class MentorService {
     const exist = await this.prisma.mentor.findFirst({ where: { id } });
     if (!exist) throw BaseError.notFound("Mentor not found.");
 
-    return await this.prisma.mentor.update({ where: { id }, data: value });
+    const updated = await this.prisma.mentor.update({
+      where: { id },
+      data: value,
+    });
+
+    if (
+      value.status === MentorStatus.ACCEPTED &&
+      exist.status !== updated.status
+    ) {
+      const existingEnrollment = await this.prisma.courseEnrollment.findFirst({
+        where: {
+          user_id: updated.user_id,
+          course_id: updated.course_id,
+        },
+      });
+
+      if (!existingEnrollment) {
+        await this.prisma.courseEnrollment.create({
+          data: {
+            user_id: updated.user_id,
+            course_id: updated.course_id,
+            role: CourseEnrollmentRole.MENTOR,
+          },
+        });
+      }
+    }
+
+    return updated;
   }
 
   async delete(id, user) {

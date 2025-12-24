@@ -25,6 +25,12 @@ class CourseRoutes extends BaseRoutes {
       tryCatch(CourseController.getAllMe),
     ]);
 
+    this.router.get("/:id/dashboard", [
+      authMiddleware.authenticate,
+      authMiddleware.authorizeRoles([Role.ADMIN, Role.STUDENT]),
+      tryCatch(CourseController.getByIdForUser),
+    ]);
+
     this.router.get("/:id", [tryCatch(CourseController.getById)]);
 
     this.router.post("/", [

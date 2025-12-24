@@ -115,6 +115,25 @@ class CourseService {
     return data;
   }
 
+  async getByIdForUser(id, user) {
+    if (user?.role === "ADMIN") return this.getById(id);
+
+    const enrollment = await this.prisma.courseEnrollment.findFirst({
+      where: {
+        course_id: id,
+        user_id: user.id,
+        role: {
+          in: ["MEMBER", "MENTOR"],
+        },
+      },
+    });
+
+    if (!enrollment)
+      throw BaseError.forbidden("You are not enrolled in this course.");
+
+    return this.getById(id);
+  }
+
   async create(value, user, file) {
     if (file) {
       const uploadResult = await this.cloudinary.uploadFromBufferToCloudinary(

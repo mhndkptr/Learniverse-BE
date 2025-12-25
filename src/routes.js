@@ -12,6 +12,7 @@ import modulRoutes from "./domains/v1/modul/modul-routes.js";
 import courseEnrollmentRoutes from "./domains/v1/course/course-enrollment/course-enrollment-routes.js";
 import courseTransactionRoutes from "./domains/v1/course/course-transaction/course-transaction-routes.js";
 import mentorRoutes from "./domains/v1/mentor/mentor-routes.js";
+import overviewRoutes from "./domains/v1/overview/overview-routes.js";
 
 const router = express.Router();
 
@@ -25,10 +26,14 @@ const appsV1Routes = [
   { path: "/quiz/question", route: quizQuestionRoutes },
   { path: "/quiz/optionAnswer", route: quizOptionAnswerRoutes },
   { path: "/quiz/attempt", route: quizAttemptRoutes },
-  { path: "/quiz/attemptQuestionAnswer", route: quizAttemptQuestionAnswerRoutes },
+  {
+    path: "/quiz/attemptQuestionAnswer",
+    route: quizAttemptQuestionAnswerRoutes,
+  },
   { path: "/user", route: userRoutes },
   { path: "/mentor", route: mentorRoutes },
   { path: "/modul", route: modulRoutes },
+  { path: "/overview", route: overviewRoutes },
 ];
 
 appsV1Routes.forEach(({ path, route }) => {

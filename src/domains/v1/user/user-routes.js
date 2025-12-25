@@ -3,6 +3,7 @@ import {
   createUserSchema,
   updateUserSchema,
   getAllUserParamsSchema,
+  changePasswordSchema,
 } from "./user.schema.js";
 import validateCredentials from "../../../middlewares/validate-credentials-middleware.js";
 import authTokenMiddleware from "../../../middlewares/auth-token-middleware.js";
@@ -41,6 +42,14 @@ class UserRoutes extends BaseRoutes {
       uploadFile("image").single("profile_uri"),
       validateCredentials(updateUserSchema),
       tryCatch(userController.update)
+    );
+
+    this.router.patch(
+      "/:id/change-password",
+      authTokenMiddleware.authenticate,
+      authTokenMiddleware.authorizeRoles([Role.ADMIN, Role.STUDENT]),
+      validateCredentials(changePasswordSchema),
+      tryCatch(userController.changePassword)
     );
 
     this.router.delete(

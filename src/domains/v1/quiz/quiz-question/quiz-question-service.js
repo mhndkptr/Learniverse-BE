@@ -3,10 +3,31 @@ import { PrismaService } from "../../../../common/services/prisma-service.js";
 import { buildQueryOptions } from "../../../../utils/buildQueryOptions.js";
 import BaseError from "../../../../base-classes/base-error.js";
 import quizQuestionQueryConfig from "./quiz-question-query-config.js";
+import MentorStatus from "../../../../common/enums/mentor-status-enum.js";
 
 class QuizQuestionService {
   constructor() {
     this.prisma = new PrismaService();
+  }
+
+  async ensureAdminOrMentor(user, courseId) {
+    if (!user) throw BaseError.unauthorized("Unauthorized");
+    if (user.role === "ADMIN") return;
+    if (!courseId) throw BaseError.badRequest("Course id is required");
+
+    const mentor = await this.prisma.mentor.findFirst({
+      where: {
+        user_id: user.id,
+        course_id: courseId,
+        status: MentorStatus.ACCEPTED,
+      },
+    });
+
+    if (!mentor) {
+      throw BaseError.forbidden(
+        "Only admin or course mentor can manage quiz questions"
+      );
+    }
   }
 
   async getAll(query) {
@@ -76,6 +97,8 @@ class QuizQuestionService {
       ]);
     }
 
+    await this.ensureAdminOrMentor(user, quizExists.course_id);
+
     // Use a transaction for create to be explicit and consistent
     const data = await this.prisma.$transaction(async (tx) => {
       const created = await tx.quizQuestion.create({
@@ -108,10 +131,15 @@ class QuizQuestionService {
   async update(id, value, user) {
     const quizQuestion = await this.prisma.quizQuestion.findUnique({
       where: { id },
-      include: { quiz_option_answers: true },
+      include: {
+        quiz_option_answers: true,
+        quiz: true,
+      },
     });
 
     if (!quizQuestion) throw BaseError.notFound("Quiz question not found.");
+
+    await this.ensureAdminOrMentor(user, quizQuestion.quiz?.course_id);
 
     // perform update and option answers replacement in a transaction
     const updated = await this.prisma.$transaction(async (tx) => {
@@ -151,9 +179,12 @@ class QuizQuestionService {
   async delete(id, user) {
     const quizQuestion = await this.prisma.quizQuestion.findUnique({
       where: { id },
+      include: { quiz: true },
     });
 
     if (!quizQuestion) throw BaseError.notFound("Quiz question not found.");
+
+    await this.ensureAdminOrMentor(user, quizQuestion.quiz?.course_id);
 
     const deleted = await this.prisma.quizQuestion.delete({ where: { id } });
     return {

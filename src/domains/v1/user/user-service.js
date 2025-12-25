@@ -84,6 +84,9 @@ class UserService {
 
 		// If password provided, hash it
 		const updateData = { ...data };
+		if (updateData.password_confirmation) {
+			delete updateData.password_confirmation;
+		}
 		if (data.password) {
 			updateData.password = await hashPassword(data.password);
 		}

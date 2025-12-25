@@ -37,7 +37,7 @@ const getAllQuizParamsSchema = Joi.object({
   }).optional(),
 
   include_relation: Joi.array()
-    .items(Joi.string().valid("course", "quiz"))
+    .items(Joi.string().valid("quiz_questions", "course", "quiz_attempts"))
     .optional(),
 
   filter: Joi.object({

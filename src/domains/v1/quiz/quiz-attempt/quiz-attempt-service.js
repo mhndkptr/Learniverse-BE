@@ -27,7 +27,25 @@ class QuizAttemptService {
       options.where.user_id = query.advSearch.user_id;
     }
 
-    const [data, count] = await Promise.all([
+    options.include = {
+      ...options.include, // Pertahankan include lain jika ada dari buildQueryOptions
+      user: true, // Opsional: biasanya perlu data user
+      quiz: {
+        select: {
+          title: true,
+          _count: {
+            select: { quiz_questions: true }, // Mengambil jumlah total soal
+          },
+        },
+      },
+      quiz_attempt_question_answers: {
+        include: {
+          quiz_option_answer: true, // Mengambil status is_correct
+        },
+      },
+    };
+
+    const [rawData, count] = await Promise.all([
       this.prisma.QuizAttempt.findMany({
         ...options,
       }),
@@ -36,12 +54,40 @@ class QuizAttemptService {
       }),
     ]);
 
+    const dataWithGrade = rawData.map((attempt) => {
+      // Hitung jumlah jawaban yang benar (is_correct === true)
+      const correctAnswersCount = attempt.quiz_attempt_question_answers.filter(
+        (ans) => ans.quiz_option_answer?.is_correct === true
+      ).length;
+
+      // Ambil total soal dari relasi quiz
+      const totalQuestions = attempt.quiz?._count?.quiz_questions || 0;
+
+      // Rumus Nilai: (Benar / Total Soal) * 100
+      let grade = 0;
+      if (totalQuestions > 0) {
+        grade = (correctAnswersCount / totalQuestions) * 100;
+      }
+
+      // Bersihkan object return (opsional, agar response tidak terlalu berat)
+      // Kita bisa menghapus 'quiz_attempt_question_answers' jika tidak ingin ditampilkan di list
+      // const { quiz_attempt_question_answers, ...rest } = attempt;
+
+      return {
+        ...attempt, // atau ...rest jika menghapus detail jawaban
+        total_correct: correctAnswersCount, // Opsional: info jumlah benar
+        total_questions: totalQuestions, // Opsional: info total soal
+        grade: parseFloat(grade.toFixed(2)), // Masukkan variable grade (pembulatan 2 desimal)
+      };
+    });
+
+    // 5. PAGINATION RESPONSE
     const currentPage = query?.pagination?.page ?? 1;
     const itemsPerPage = query?.pagination?.limit ?? 10;
     const totalPages = Math.ceil(count / itemsPerPage);
 
     return {
-      data,
+      data: dataWithGrade, // Gunakan data yang sudah ada grade-nya
       meta:
         query?.pagination?.page && query?.pagination?.limit
           ? {
@@ -93,10 +139,12 @@ class QuizAttemptService {
     });
 
     if (!quizExists) {
-      throw new Joi.ValidationError("Quiz not found", [{
-        message: "Quiz not found",
-        path: ["quiz_id"],
-      }]);
+      throw new Joi.ValidationError("Quiz not found", [
+        {
+          message: "Quiz not found",
+          path: ["quiz_id"],
+        },
+      ]);
     }
 
     const userExists = await this.prisma.User.findUnique({
@@ -104,10 +152,12 @@ class QuizAttemptService {
     });
 
     if (!userExists) {
-      throw new Joi.ValidationError("User not found", [{
-        message: "User not found",
-        path: ["user_id"],
-      }]);
+      throw new Joi.ValidationError("User not found", [
+        {
+          message: "User not found",
+          path: ["user_id"],
+        },
+      ]);
     }
 
     const attemptCount = await this.prisma.QuizAttempt.count({
@@ -123,40 +173,17 @@ class QuizAttemptService {
       );
     }
 
-    if (!value.start_at) {
-      throw new Joi.ValidationError("Start date is required.", [{
-        message: "Start date is required.",
-        path: ["start_at"],
-      }]);
-    }
-
-    if (!value.finish_at) {
-      throw new Joi.ValidationError("Finish date is required.", [{
-        message: "Finish date is required.",
-        path: ["finish_at"],
-      }]);
-    }
-
-    if (new Date(value.finish_at) < new Date(value.start_at)) {
-      throw new Joi.ValidationError("Finish date must be after start date", [{
-        message: "Finish date must be after start date",
-        path: ["finish_at"],
-      }]);
-    }
-
     const data = await this.prisma.QuizAttempt.create({
       data: {
-        quiz_id: value.quiz_id,
-        user_id: user.id,
-        status: value.status || QuizAttemptStatus.ON_PROGRESS,
-        start_at: value.start_at,
-        finish_at: value.finish_at,
-        quiz_attempt_question_answers: {
-          create: value.quiz_attempt_question_answers?.map((answer) => ({
-            quiz_question_id: answer.quiz_question_id,
-            quiz_option_answer_id: answer.quiz_option_answer_id,
-          })) || [],
+        quiz: {
+          connect: { id: value.quiz_id },
         },
+        user: {
+          connect: { id: user.id },
+        },
+        status: QuizAttemptStatus.ON_PROGRESS,
+        start_at: new Date(),
+        finish_at: null,
       },
       include: {
         quiz: {
@@ -209,10 +236,12 @@ class QuizAttemptService {
 
     if (value.finish_at) {
       if (new Date(value.finish_at) < new Date(quizAttempt.start_at)) {
-        throw new Joi.ValidationError("Finish date must be after start date", [{
-          message: "Finish date must be after start date",
-          path: ["finish_at"],
-        }]);
+        throw new Joi.ValidationError("Finish date must be after start date", [
+          {
+            message: "Finish date must be after start date",
+            path: ["finish_at"],
+          },
+        ]);
       }
     }
 

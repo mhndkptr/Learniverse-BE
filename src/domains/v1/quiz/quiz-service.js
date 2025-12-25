@@ -5,44 +5,156 @@ import BaseError from "../../../base-classes/base-error.js";
 import QuizType from "../../../common/enums/quiz-enum.js";
 import quizQueryConfig from "./quiz-query-config.js";
 import ScheduleService from "../schedule/schedule-service.js";
+import QuizAttemptStatus from "../../../common/enums/quiz-attempt-status-enum.js";
 
 class QuizService {
   constructor() {
     this.prisma = new PrismaService();
   }
 
-  async getAll(query) {
+  async getAll(query, user, enrollmentRole) {
     const options = buildQueryOptions(quizQueryConfig, query);
 
+    // 1. Filter ID Quiz
     if (query.advSearch?.quiz_id) {
-      if (!options.where) {
-        options.where = {};
-      }
+      if (!options.where) options.where = {};
+      options.where.id = query.advSearch.quiz_id;
+    }
 
-      options.where.quiz = {
-        ...options.where.quiz,
-        quiz_id: query.advSearch.quiz_id,
+    // 2. Setup Include
+    const includeConfig = {
+      course: true,
+      _count: {
+        select: { quiz_questions: true },
+      },
+    };
+
+    // 3. Cek Role Enrollment
+    const isMember = user && enrollmentRole === "MEMBER";
+
+    if (isMember) {
+      includeConfig.quiz_attempts = {
+        where: {
+          user_id: user.id,
+        },
+        include: {
+          quiz_attempt_question_answers: {
+            include: {
+              quiz_option_answer: true,
+            },
+          },
+        },
       };
     }
 
-    const [data, count] = await Promise.all([
+    // 4. Eksekusi Query
+
+    const [rawData, count] = await Promise.all([
       this.prisma.Quiz.findMany({
         ...options,
-        include: {
-          course: true,
-        },
+        include: includeConfig,
       }),
       this.prisma.Quiz.count({
         where: options.where,
       }),
     ]);
 
+    // 5. Processing Data (Logic Validasi Attempt & Hitung Nilai)
+    // Gunakan Promise.all karena kita mungkin melakukan update DB di dalam loop
+    const dataWithGrade = await Promise.all(
+      rawData.map(async (quiz) => {
+        const totalQuestions = quiz._count?.quiz_questions || 0;
+        let personalHighestGrade = null;
+        let activeAttemptId = null; // Variable untuk menampung ID attempt yg masih jalan
+
+        // Logika hanya jalan jika user MEMBER dan punya history attempt
+        if (isMember && quiz.quiz_attempts?.length > 0) {
+          // Kita tampung attempt yang valid untuk dinilai (sudah FINISHED)
+          let finishedAttemptsForGrading = [];
+
+          // Loop setiap attempt untuk pengecekan status
+          for (const attempt of quiz.quiz_attempts) {
+            // A. Kalo sudah FINISHED, langsung masuk antrian nilai
+            if (attempt.status === "FINISHED") {
+              finishedAttemptsForGrading.push(attempt);
+              continue;
+            }
+
+            // B. Kalo ON_PROGRESS, kita cek apakah waktunya sudah habis
+            if (attempt.status === "ON_PROGRESS") {
+              const now = new Date();
+              const quizEndDate = new Date(quiz.end_date);
+
+              // Hitung kapan attempt ini harusnya selesai (start + duration menit)
+              // quiz.duration asumsinya dalam menit
+              const attemptExpiryTime = new Date(
+                attempt.start_at.getTime() + quiz.duration * 60000
+              );
+
+              // Cek Kondisi Expired (Lewat durasi ATAU Lewat deadline kuis)
+              const isTimeUp = now > attemptExpiryTime;
+              const isDeadlinePassed = now > quizEndDate;
+
+              if (isTimeUp || isDeadlinePassed) {
+                // UPDATE KE DB: Force Finish karena waktu habis
+                const updatedAttempt = await this.prisma.quizAttempt.update({
+                  where: { id: attempt.id },
+                  data: {
+                    status: "FINISHED",
+                    finish_at: now, // Set waktu selesai sekarang
+                  },
+                  include: {
+                    quiz_attempt_question_answers: {
+                      include: { quiz_option_answer: true },
+                    },
+                  },
+                });
+
+                // Masukkan attempt yang baru di-update ini ke perhitungan nilai
+                finishedAttemptsForGrading.push(updatedAttempt);
+              } else {
+                // Masih valid ON_PROGRESS (Waktu masih ada)
+                // Set active ID untuk dikirim ke frontend
+                activeAttemptId = attempt.id;
+              }
+            }
+          }
+
+          // C. Hitung Nilai Tertinggi dari finishedAttemptsForGrading
+          if (finishedAttemptsForGrading.length > 0 && totalQuestions > 0) {
+            const grades = finishedAttemptsForGrading.map((attempt) => {
+              const correctCount = attempt.quiz_attempt_question_answers.filter(
+                (ans) => ans.quiz_option_answer?.is_correct === true
+              ).length;
+
+              return (correctCount / totalQuestions) * 100;
+            });
+
+            const maxScore = Math.max(...grades);
+            personalHighestGrade = parseFloat(maxScore.toFixed(2));
+          }
+        }
+
+        // Bersihkan object return
+        const { quiz_attempts, _count, ...rest } = quiz;
+
+        return {
+          ...rest,
+          quiz_attempts,
+          total_questions: totalQuestions,
+          personal_highest_grade: personalHighestGrade,
+          active_attempt_id: activeAttemptId, // NULL jika tidak ada yg on-progress, isi string UUID jika ada
+          is_attempted: isMember ? quiz.quiz_attempts?.length > 0 : false,
+        };
+      })
+    );
+
     const currentPage = query?.pagination?.page ?? 1;
     const itemsPerPage = query?.pagination?.limit ?? 10;
     const totalPages = Math.ceil(count / itemsPerPage);
 
     return {
-      data,
+      data: dataWithGrade,
       meta:
         query?.pagination?.page && query?.pagination?.limit
           ? {
@@ -56,11 +168,11 @@ class QuizService {
   }
 
   async getAllForStudent(user) {
-    const data = await this.prisma.quiz.findMany({
+    const rawData = await this.prisma.quiz.findMany({
       where: {
         status: "PUBLISH",
         end_date: {
-          gt: new Date(),
+          gt: new Date(), // Menampilkan quiz yang belum expired
         },
         course: {
           course_enrollments: {
@@ -70,23 +182,69 @@ class QuizService {
             },
           },
         },
-
-        quiz_attempts: {
-          none: {
-            user_id: user.id,
-          },
-        },
+        // HAPUS bagian 'quiz_attempts: { none... }' agar quiz yang sudah dikerjakan tetap muncul
       },
       include: {
         course: true,
+        // 1. Ambil jumlah soal untuk pembagi rumus nilai
+        _count: {
+          select: {
+            quiz_questions: true,
+          },
+        },
+        // 2. Ambil attempt user ini untuk dihitung nilainya
+        quiz_attempts: {
+          where: {
+            user_id: user.id, // Hanya attempt milik user yang sedang login
+          },
+          include: {
+            quiz_attempt_question_answers: {
+              include: {
+                quiz_option_answer: true, // Untuk cek is_correct
+              },
+            },
+          },
+        },
       },
       orderBy: {
         end_date: "asc",
       },
     });
 
+    // 3. Mapping data untuk menghitung Highest Grade
+    const dataWithGrade = rawData.map((quiz) => {
+      const totalQuestions = quiz._count.quiz_questions || 0;
+      let highestGrade = null; // Default null jika belum pernah dikerjakan
+
+      // Jika user sudah pernah mencoba (attempt > 0)
+      if (quiz.quiz_attempts.length > 0 && totalQuestions > 0) {
+        // Hitung nilai untuk SETIAP attempt
+        const grades = quiz.quiz_attempts.map((attempt) => {
+          const correctCount = attempt.quiz_attempt_question_answers.filter(
+            (ans) => ans.quiz_option_answer?.is_correct === true
+          ).length;
+
+          return (correctCount / totalQuestions) * 100;
+        });
+
+        // Ambil nilai tertinggi dari array grades
+        const maxScore = Math.max(...grades);
+        highestGrade = parseFloat(maxScore.toFixed(2));
+      }
+
+      // Opsional: Bersihkan object agar tidak terlalu berat (menghapus detail attempt)
+      // const { quiz_attempts, ...rest } = quiz;
+
+      return {
+        ...quiz, // atau ...rest
+        total_questions: totalQuestions,
+        highest_grade: highestGrade, // Field baru: Nilai Tertinggi
+        is_attempted: quiz.quiz_attempts.length > 0, // Info apakah sudah pernah dikerjakan
+      };
+    });
+
     return {
-      data,
+      data: dataWithGrade,
       meta: null,
     };
   }

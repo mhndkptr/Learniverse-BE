@@ -6,10 +6,31 @@ import QuizType from "../../../common/enums/quiz-enum.js";
 import quizQueryConfig from "./quiz-query-config.js";
 import ScheduleService from "../schedule/schedule-service.js";
 import QuizAttemptStatus from "../../../common/enums/quiz-attempt-status-enum.js";
+import MentorStatus from "../../../common/enums/mentor-status-enum.js";
 
 class QuizService {
   constructor() {
     this.prisma = new PrismaService();
+  }
+
+  async ensureAdminOrMentor(user, courseId) {
+    if (!user) throw BaseError.unauthorized("Unauthorized");
+    if (user.role === "ADMIN") return;
+    if (!courseId) throw BaseError.badRequest("Course id is required");
+
+    const mentor = await this.prisma.mentor.findFirst({
+      where: {
+        user_id: user.id,
+        course_id: courseId,
+        status: MentorStatus.ACCEPTED,
+      },
+    });
+
+    if (!mentor) {
+      throw BaseError.forbidden(
+        "Only admin or course mentor can manage quizzes"
+      );
+    }
   }
 
   async getAll(query, user, enrollmentRole) {
@@ -182,7 +203,11 @@ class QuizService {
             },
           },
         },
-        // HAPUS bagian 'quiz_attempts: { none... }' agar quiz yang sudah dikerjakan tetap muncul
+        quiz_attempts: {
+          none: {
+            user_id: user.id,
+          },
+        },
       },
       include: {
         course: true,
@@ -268,6 +293,8 @@ class QuizService {
   }
 
   async create(value, user) {
+    await this.ensureAdminOrMentor(user, value.course_id);
+
     if (value.course_id) {
       const courseExists = await this.prisma.Course.findUnique({
         where: { id: value.course_id },
@@ -355,6 +382,8 @@ class QuizService {
 
     if (!quiz) throw BaseError.notFound("Quiz not found.");
 
+    await this.ensureAdminOrMentor(user, value.course_id || quiz.course_id);
+
     if (value.course_id) {
       const courseExists = await this.prisma.Course.findUnique({
         where: { id: value.course_id },
@@ -408,6 +437,8 @@ class QuizService {
     });
 
     if (!quiz) throw BaseError.notFound("Quiz not found.");
+
+    await this.ensureAdminOrMentor(user, quiz.course_id);
 
     const deletedQuiz = await this.prisma.Quiz.delete({
       where: { id },

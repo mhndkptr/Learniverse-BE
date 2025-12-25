@@ -4,7 +4,11 @@ import QuizService from "./quiz-service.js";
 
 class QuizController {
   async getAll(req, res) {
-    const quiz = await QuizService.getAll(req.validatedQuery);
+    const quiz = await QuizService.getAll(
+      req.validatedQuery,
+      req.user,
+      req.enrollmentRole
+    );
 
     return successResponse(
       res,

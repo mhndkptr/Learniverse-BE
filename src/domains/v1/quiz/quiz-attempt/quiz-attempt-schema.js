@@ -63,23 +63,6 @@ const createQuizAttemptSchema = Joi.object({
     "any.required": "Quiz ID is required.",
   }),
 
-  status: Joi.string()
-    .valid(...Object.values(QuizAttemptStatus))
-    .default("ON_PROGRESS")
-    .messages({
-      "any.only": `Status must be one of: ${Object.values(QuizAttemptStatus).join(", ")}`,
-    }),
-
-  start_at: Joi.date().iso().required().messages({
-    "any.required": "Start date is required.",
-    "date.format": "Start date must be in ISO 8601 format.",
-  }),
-
-  finish_at: Joi.date().iso().required().messages({
-    "any.required": "Finish date is required.",
-    "date.format": "Finish date must be in ISO 8601 format.",
-  }),
-
   quiz_attempt_question_answers: Joi.array()
     .items(QuizAttemptAnswerSchema)
     .optional(),
@@ -89,7 +72,9 @@ const updateQuizAttemptSchema = Joi.object({
   status: Joi.string()
     .valid(...Object.values(QuizAttemptStatus))
     .messages({
-      "any.only": `Status must be one of: ${Object.values(QuizAttemptStatus).join(", ")}`,
+      "any.only": `Status must be one of: ${Object.values(
+        QuizAttemptStatus
+      ).join(", ")}`,
     }),
 
   finish_at: Joi.date().iso().messages({

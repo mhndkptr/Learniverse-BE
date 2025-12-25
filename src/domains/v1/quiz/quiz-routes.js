@@ -16,11 +16,13 @@ import {
   getAllQuizParamsSchema,
 } from "./quiz-schema.js";
 import Role from "../../../common/enums/role-enum.js";
+import enrollmentMiddleware from "../../../middlewares/enrollment-middleware.js";
 
 class QuizRoutes extends BaseRoutes {
   routes() {
     this.router.get("/", [
       authTokenMiddleware.authenticate,
+      enrollmentMiddleware.check,
       validateQueryParamsCredentials(getAllQuizParamsSchema),
       tryCatch(QuizController.getAll),
     ]);

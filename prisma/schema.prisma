@@ -246,7 +246,7 @@ model QuizAttempt {
   id            String    @id @default(uuid())
   status        QuizAttemptStatus
   start_at      DateTime
-  finish_at     DateTime
+  finish_at     DateTime?
   quiz_id       String
   user_id       String
 

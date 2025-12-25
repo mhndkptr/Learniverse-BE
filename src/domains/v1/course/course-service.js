@@ -134,6 +134,21 @@ class CourseService {
     return this.getById(id);
   }
 
+  async checkEnroll(id, user) {
+    const enrollment = await this.prisma.courseEnrollment.findFirst({
+      where: {
+        course_id: id,
+        user_id: user.id,
+        role: {
+          in: ["MEMBER", "MENTOR"],
+        },
+      },
+    });
+
+    if (!enrollment) throw BaseError.notFound("Enrollment not found.");
+    return enrollment;
+  }
+
   async create(value, user, file) {
     if (file) {
       const uploadResult = await this.cloudinary.uploadFromBufferToCloudinary(

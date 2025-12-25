@@ -35,6 +35,13 @@ class CourseController {
     return successResponse(res, data, "Course retrieved successfully");
   }
 
+  async checkEnroll(req, res) {
+    const { id } = req.params;
+
+    const data = await CourseService.checkEnroll(id, req.user);
+    return successResponse(res, data, "Course check enrollment successfully");
+  }
+
   async create(req, res) {
     if (!req.body) throw BaseError.badRequest("Request body is missing");
     if (!req.file) throw BaseError.badRequest("Image file is missing");

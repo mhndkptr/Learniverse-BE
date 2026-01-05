@@ -138,6 +138,12 @@ class CourseTransactionService {
             quantity: 1,
             name: courseExist.title,
           },
+          {
+            id: "platform_fee",
+            price: Number(process.env.PLATFORM_FEE_AMOUNT) || 0,
+            quantity: 1,
+            name: "Platform Fee",
+          },
         ],
         metadata: {
           type: "course_transaction",

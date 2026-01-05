@@ -110,7 +110,9 @@ class CourseTransactionService {
 
       let courseTransaction = await tx.courseTransaction.create({
         data: {
-          amount: Number(courseExist.price),
+          amount:
+            Number(courseExist.price) +
+            (Number(process.env.APP_PLATFORM_FEE_AMOUNT) || 0),
           user_id: value.user_id,
           course_id: value.course_id,
           status: CourseTransactionStatus.WAITING_PAYMENT,
@@ -120,7 +122,9 @@ class CourseTransactionService {
       const parameter = {
         transaction_details: {
           order_id: courseTransaction.id,
-          gross_amount: courseExist.price,
+          gross_amount:
+            courseExist.price +
+            (Number(process.env.APP_PLATFORM_FEE_AMOUNT) || 0),
         },
         credit_card: {
           secure: true,

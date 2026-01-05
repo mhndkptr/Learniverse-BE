@@ -140,7 +140,7 @@ class CourseTransactionService {
           },
           {
             id: "platform_fee",
-            price: Number(process.env.PLATFORM_FEE_AMOUNT) || 0,
+            price: Number(process.env.APP_PLATFORM_FEE_AMOUNT) || 0,
             quantity: 1,
             name: "Platform Fee",
           },

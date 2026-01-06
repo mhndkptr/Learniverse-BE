@@ -43,10 +43,17 @@ class QuizService {
     }
 
     // 2. Setup Include
+    // PERUBAHAN: Kita butuh detail question & option untuk membuat Kunci Jawaban
     const includeConfig = {
       course: true,
       _count: {
         select: { quiz_questions: true },
+      },
+      // Tambahkan ini agar kita bisa memvalidasi jawaban benar/salah secara manual
+      quiz_questions: {
+        include: {
+          quiz_option_answers: true,
+        },
       },
     };
 
@@ -59,17 +66,13 @@ class QuizService {
           user_id: user.id,
         },
         include: {
-          quiz_attempt_question_answers: {
-            include: {
-              quiz_option_answer: true,
-            },
-          },
+          // Ambil jawaban user
+          quiz_attempt_question_answers: true,
         },
       };
     }
 
     // 4. Eksekusi Query
-
     const [rawData, count] = await Promise.all([
       this.prisma.Quiz.findMany({
         ...options,
@@ -80,74 +83,104 @@ class QuizService {
       }),
     ]);
 
-    // 5. Processing Data (Logic Validasi Attempt & Hitung Nilai)
-    // Gunakan Promise.all karena kita mungkin melakukan update DB di dalam loop
+    // 5. Processing Data
     const dataWithGrade = await Promise.all(
       rawData.map(async (quiz) => {
-        const totalQuestions = quiz._count?.quiz_questions || 0;
+        const totalQuestions =
+          quiz.quiz_questions?.length || quiz._count?.quiz_questions || 0;
         let personalHighestGrade = null;
-        let activeAttemptId = null; // Variable untuk menampung ID attempt yg masih jalan
+        let activeAttemptId = null;
 
-        // Logika hanya jalan jika user MEMBER dan punya history attempt
+        // --- A. MEMBUAT KUNCI JAWABAN (ANSWER KEY) ---
+        // Format: { "question_id": ["option_id_A", "option_id_B"] }
+        const answerKeyMap = {};
+        quiz.quiz_questions.forEach((q) => {
+          // Ambil ID opsi yang is_correct === true
+          const correctOptionIds = q.quiz_option_answers
+            .filter((opt) => opt.is_correct)
+            .map((opt) => opt.id);
+
+          answerKeyMap[q.id] = {
+            type: q.type, // 'SINGLE_CHOICE' atau 'MULTIPLE_CHOICE'
+            correctIds: correctOptionIds,
+          };
+        });
+
         if (isMember && quiz.quiz_attempts?.length > 0) {
-          // Kita tampung attempt yang valid untuk dinilai (sudah FINISHED)
           let finishedAttemptsForGrading = [];
 
-          // Loop setiap attempt untuk pengecekan status
           for (const attempt of quiz.quiz_attempts) {
-            // A. Kalo sudah FINISHED, langsung masuk antrian nilai
+            // Logic Cek Status (SAMA SEPERTI SEBELUMNYA)
             if (attempt.status === "FINISHED") {
               finishedAttemptsForGrading.push(attempt);
               continue;
             }
 
-            // B. Kalo ON_PROGRESS, kita cek apakah waktunya sudah habis
             if (attempt.status === "ON_PROGRESS") {
               const now = new Date();
               const quizEndDate = new Date(quiz.end_date);
-
-              // Hitung kapan attempt ini harusnya selesai (start + duration menit)
-              // quiz.duration asumsinya dalam menit
               const attemptExpiryTime = new Date(
                 attempt.start_at.getTime() + quiz.duration * 60000
               );
 
-              // Cek Kondisi Expired (Lewat durasi ATAU Lewat deadline kuis)
               const isTimeUp = now > attemptExpiryTime;
               const isDeadlinePassed = now > quizEndDate;
 
               if (isTimeUp || isDeadlinePassed) {
-                // UPDATE KE DB: Force Finish karena waktu habis
+                // Force Finish
                 const updatedAttempt = await this.prisma.quizAttempt.update({
                   where: { id: attempt.id },
                   data: {
                     status: "FINISHED",
-                    finish_at: now, // Set waktu selesai sekarang
+                    finish_at: now,
                   },
                   include: {
-                    quiz_attempt_question_answers: {
-                      include: { quiz_option_answer: true },
-                    },
+                    quiz_attempt_question_answers: true,
                   },
                 });
-
-                // Masukkan attempt yang baru di-update ini ke perhitungan nilai
                 finishedAttemptsForGrading.push(updatedAttempt);
               } else {
-                // Masih valid ON_PROGRESS (Waktu masih ada)
-                // Set active ID untuk dikirim ke frontend
                 activeAttemptId = attempt.id;
               }
             }
           }
 
-          // C. Hitung Nilai Tertinggi dari finishedAttemptsForGrading
+          // --- B. HITUNG NILAI (LOGIC BARU) ---
           if (finishedAttemptsForGrading.length > 0 && totalQuestions > 0) {
             const grades = finishedAttemptsForGrading.map((attempt) => {
-              const correctCount = attempt.quiz_attempt_question_answers.filter(
-                (ans) => ans.quiz_option_answer?.is_correct === true
-              ).length;
+              // 1. Grouping Jawaban User berdasarkan Question ID
+              // Format: { "question_id": ["option_id_user_picked"] }
+              const userAnswersMap = {};
+              (attempt.quiz_attempt_question_answers || []).forEach((ans) => {
+                if (!userAnswersMap[ans.quiz_question_id]) {
+                  userAnswersMap[ans.quiz_question_id] = [];
+                }
+                userAnswersMap[ans.quiz_question_id].push(
+                  ans.quiz_option_answer_id
+                );
+              });
 
+              // 2. Bandingkan User Answer vs Answer Key
+              let correctCount = 0;
+
+              Object.keys(answerKeyMap).forEach((qId) => {
+                const keyData = answerKeyMap[qId];
+                const correctIds = keyData.correctIds; // Array jawaban benar
+                const userIds = userAnswersMap[qId] || []; // Array jawaban user (bisa kosong)
+
+                // LOGIC PENILAIAN:
+                // Soal dianggap benar JIKA jumlah jawaban sama DAN isinya sama persis
+                // Ini menangani Multiple Choice (harus pilih SEMUA yang benar)
+                const isExactMatch =
+                  correctIds.length === userIds.length &&
+                  correctIds.every((id) => userIds.includes(id));
+
+                if (isExactMatch) {
+                  correctCount++;
+                }
+              });
+
+              // 3. Kalkulasi Persentase
               return (correctCount / totalQuestions) * 100;
             });
 
@@ -156,15 +189,15 @@ class QuizService {
           }
         }
 
-        // Bersihkan object return
-        const { quiz_attempts, _count, ...rest } = quiz;
+        // Clean up: Hapus quiz_questions agar payload response tidak terlalu besar
+        const { quiz_attempts, quiz_questions, _count, ...rest } = quiz;
 
         return {
           ...rest,
-          quiz_attempts,
+          quiz_attempts, // Anda bisa menghapus ini jika tidak ingin list attempt di return
           total_questions: totalQuestions,
           personal_highest_grade: personalHighestGrade,
-          active_attempt_id: activeAttemptId, // NULL jika tidak ada yg on-progress, isi string UUID jika ada
+          active_attempt_id: activeAttemptId,
           is_attempted: isMember ? quiz.quiz_attempts?.length > 0 : false,
         };
       })

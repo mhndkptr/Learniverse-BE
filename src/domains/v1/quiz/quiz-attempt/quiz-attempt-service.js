@@ -14,35 +14,33 @@ class QuizAttemptService {
     const options = buildQueryOptions(quizAttemptQueryConfig, query);
 
     if (query.advSearch?.quiz_id) {
-      if (!options.where) {
-        options.where = {};
-      }
+      if (!options.where) options.where = {};
       options.where.quiz_id = query.advSearch.quiz_id;
     }
 
     if (query.advSearch?.user_id) {
-      if (!options.where) {
-        options.where = {};
-      }
+      if (!options.where) options.where = {};
       options.where.user_id = query.advSearch.user_id;
     }
 
+    // --- PERBAIKAN 1: Update Include ---
+    // Kita butuh data lengkap soal & opsi (dari Quiz) untuk membuat "Kunci Jawaban"
+    // Dan data jawaban user (dari Attempt) untuk dicocokkan.
     options.include = {
-      ...options.include, // Pertahankan include lain jika ada dari buildQueryOptions
-      user: true, // Opsional: biasanya perlu data user
+      ...options.include,
+      user: true,
       quiz: {
-        select: {
-          title: true,
-          _count: {
-            select: { quiz_questions: true }, // Mengambil jumlah total soal
+        include: {
+          // Ambil daftar soal dan opsi jawaban benar untuk Kunci Jawaban
+          quiz_questions: {
+            include: {
+              quiz_option_answers: true,
+            },
           },
         },
       },
-      quiz_attempt_question_answers: {
-        include: {
-          quiz_option_answer: true, // Mengambil status is_correct
-        },
-      },
+      // Ambil jawaban yang dipilih user
+      quiz_attempt_question_answers: true,
     };
 
     const [rawData, count] = await Promise.all([
@@ -54,30 +52,69 @@ class QuizAttemptService {
       }),
     ]);
 
+    // --- PERBAIKAN 2: Logika Penilaian Strict (Exact Match) ---
     const dataWithGrade = rawData.map((attempt) => {
-      // Hitung jumlah jawaban yang benar (is_correct === true)
-      const correctAnswersCount = attempt.quiz_attempt_question_answers.filter(
-        (ans) => ans.quiz_option_answer?.is_correct === true
-      ).length;
-
-      // Ambil total soal dari relasi quiz
-      const totalQuestions = attempt.quiz?._count?.quiz_questions || 0;
-
-      // Rumus Nilai: (Benar / Total Soal) * 100
-      let grade = 0;
-      if (totalQuestions > 0) {
-        grade = (correctAnswersCount / totalQuestions) * 100;
+      // Guard clause jika data quiz hilang/terhapus
+      if (!attempt.quiz || !attempt.quiz.quiz_questions) {
+        return { ...attempt, grade: 0, total_correct: 0, total_questions: 0 };
       }
 
-      // Bersihkan object return (opsional, agar response tidak terlalu berat)
-      // Kita bisa menghapus 'quiz_attempt_question_answers' jika tidak ingin ditampilkan di list
-      // const { quiz_attempt_question_answers, ...rest } = attempt;
+      const questions = attempt.quiz.quiz_questions;
+      const totalQuestions = questions.length;
+
+      // A. Grouping Jawaban User: { "question_id": ["opt_id_1", "opt_id_2"] }
+      const userAnswersMap = {};
+      (attempt.quiz_attempt_question_answers || []).forEach((ans) => {
+        if (!userAnswersMap[ans.quiz_question_id]) {
+          userAnswersMap[ans.quiz_question_id] = [];
+        }
+        userAnswersMap[ans.quiz_question_id].push(ans.quiz_option_answer_id);
+      });
+
+      // B. Loop setiap soal untuk cek Benar/Salah
+      let correctQuestionsCount = 0;
+
+      questions.forEach((question) => {
+        // 1. Ambil Kunci Jawaban (Array ID opsi yang benar)
+        const correctOptionIds = question.quiz_option_answers
+          .filter((opt) => opt.is_correct)
+          .map((opt) => opt.id);
+
+        // 2. Ambil Jawaban User untuk soal ini (Array ID)
+        const userSelectedIds = userAnswersMap[question.id] || [];
+
+        // 3. Bandingkan (Exact Match)
+        // Harus memiliki jumlah yang sama DAN semua ID benar ada di pilihan user
+        const isCorrect =
+          correctOptionIds.length === userSelectedIds.length &&
+          correctOptionIds.every((id) => userSelectedIds.includes(id));
+
+        if (isCorrect) {
+          correctQuestionsCount++;
+        }
+      });
+
+      // C. Hitung Grade Akhir
+      let grade = 0;
+      if (totalQuestions > 0) {
+        grade = (correctQuestionsCount / totalQuestions) * 100;
+      }
+
+      // D. Cleanup Object (Hapus data berat agar response ringan)
+      // Kita hapus detail soal (quiz_questions) dari object 'quiz' karena tidak perlu ditampilkan di list attempt
+      const quizSummary = {
+        title: attempt.quiz.title,
+        // Data lain dari quiz yang ingin dipertahankan
+      };
+
+      const { quiz, quiz_attempt_question_answers, ...rest } = attempt;
 
       return {
-        ...attempt, // atau ...rest jika menghapus detail jawaban
-        total_correct: correctAnswersCount, // Opsional: info jumlah benar
-        total_questions: totalQuestions, // Opsional: info total soal
-        grade: parseFloat(grade.toFixed(2)), // Masukkan variable grade (pembulatan 2 desimal)
+        ...rest,
+        quiz: quizSummary, // Return quiz tanpa nested questions yang berat
+        total_correct: correctQuestionsCount,
+        total_questions: totalQuestions,
+        grade: parseFloat(grade.toFixed(2)),
       };
     });
 
@@ -87,7 +124,7 @@ class QuizAttemptService {
     const totalPages = Math.ceil(count / itemsPerPage);
 
     return {
-      data: dataWithGrade, // Gunakan data yang sudah ada grade-nya
+      data: dataWithGrade,
       meta:
         query?.pagination?.page && query?.pagination?.limit
           ? {

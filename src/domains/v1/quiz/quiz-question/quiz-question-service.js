@@ -4,10 +4,12 @@ import { buildQueryOptions } from "../../../../utils/buildQueryOptions.js";
 import BaseError from "../../../../base-classes/base-error.js";
 import quizQuestionQueryConfig from "./quiz-question-query-config.js";
 import MentorStatus from "../../../../common/enums/mentor-status-enum.js";
+import { CloudinaryService } from "../../../../common/services/cloudinary-service.js";
 
 class QuizQuestionService {
   constructor() {
     this.prisma = new PrismaService();
+    this.cloudinary = new CloudinaryService();
   }
 
   async ensureAdminOrMentor(user, courseId) {
@@ -86,7 +88,7 @@ class QuizQuestionService {
     return data;
   }
 
-  async create(value, user) {
+  async create(value, user, file = null) {
     // validate parent quiz exists
     const quizExists = await this.prisma.Quiz.findUnique({
       where: { id: value.quiz_id },
@@ -98,6 +100,16 @@ class QuizQuestionService {
     }
 
     await this.ensureAdminOrMentor(user, quizExists.course_id);
+
+    if (file) {
+      const uploadResult = await this.cloudinary.uploadFromBufferToCloudinary(
+        file.buffer,
+        "quiz/question"
+      );
+      if (uploadResult) {
+        value.image_uri = uploadResult.secure_url;
+      }
+    }
 
     // Use a transaction for create to be explicit and consistent
     const data = await this.prisma.$transaction(async (tx) => {
@@ -128,7 +140,7 @@ class QuizQuestionService {
     return data;
   }
 
-  async update(id, value, user) {
+  async update(id, value, user, file = null) {
     const quizQuestion = await this.prisma.quizQuestion.findUnique({
       where: { id },
       include: {
@@ -140,6 +152,30 @@ class QuizQuestionService {
     if (!quizQuestion) throw BaseError.notFound("Quiz question not found.");
 
     await this.ensureAdminOrMentor(user, quizQuestion.quiz?.course_id);
+
+    if (file) {
+      if (quizQuestion.image_uri != null) {
+        try {
+          await this.cloudinary.deleteFromUrlsCloudinary([
+            quizQuestion.image_uri,
+          ]);
+        } catch (error) {
+          console.warn(
+            "Gagal menghapus gambar lama (mungkin bukan file Cloudinary), lanjut update...",
+            error.message
+          );
+        }
+      }
+
+      const uploadResult = await this.cloudinary.uploadFromBufferToCloudinary(
+        file.buffer,
+        "quiz/question"
+      );
+
+      if (uploadResult) {
+        value.image_uri = uploadResult.secure_url;
+      }
+    }
 
     // perform update and option answers replacement in a transaction
     const updated = await this.prisma.$transaction(async (tx) => {
@@ -185,6 +221,19 @@ class QuizQuestionService {
     if (!quizQuestion) throw BaseError.notFound("Quiz question not found.");
 
     await this.ensureAdminOrMentor(user, quizQuestion.quiz?.course_id);
+
+    if (quizQuestion.image_uri != null) {
+      try {
+        await this.cloudinary.deleteFromUrlsCloudinary([
+          quizQuestion.image_uri,
+        ]);
+      } catch (error) {
+        console.warn(
+          "Gagal menghapus gambar lama saat delete quiz question, lanjut delete data...",
+          error.message
+        );
+      }
+    }
 
     const deleted = await this.prisma.quizQuestion.delete({ where: { id } });
     return {

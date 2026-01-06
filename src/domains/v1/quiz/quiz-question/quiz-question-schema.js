@@ -84,8 +84,6 @@ const createQuizQuestionSchema = Joi.object({
       "any.required": "Question type is required.",
     }),
 
-  image_uri: Joi.string().uri().optional(),
-
   quiz_option_answers: Joi.array().items(QuizOptionAnswerSchema).optional(),
 });
 
@@ -100,8 +98,6 @@ const updateQuizQuestionSchema = Joi.object({
         ", "
       )}`,
     }),
-
-  image_uri: Joi.string().uri().allow(null).optional(),
 
   quiz_option_answers: Joi.array().items(QuizOptionAnswerSchema).optional(),
 })

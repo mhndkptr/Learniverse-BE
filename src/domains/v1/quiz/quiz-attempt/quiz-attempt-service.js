@@ -173,6 +173,16 @@ class QuizAttemptService {
       );
     }
 
+    const questionCount = await this.prisma.QuizQuestion.count({
+      where: { quiz_id: value.quiz_id },
+    });
+
+    if (questionCount === 0) {
+      throw BaseError.badRequest(
+        "Cannot attempt a quiz with no questions available."
+      );
+    }
+
     const data = await this.prisma.QuizAttempt.create({
       data: {
         quiz: {

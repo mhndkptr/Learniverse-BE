@@ -62,6 +62,15 @@ class MentorService {
   }
 
   async create(value, user) {
+    const existingEnrollment = await this.prisma.courseEnrollment.findFirst({
+      where: {
+        user_id: value.user_id,
+        course_id: value.course_id,
+      },
+    });
+    if (existingEnrollment) {
+      throw BaseError.badRequest("User is already enrolled in this course.");
+    }
     return await this.prisma.mentor.create({ data: value });
   }
 

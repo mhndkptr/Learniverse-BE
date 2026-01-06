@@ -1,5 +1,6 @@
 import BaseRoutes from "../../../../base-classes/base-routes.js";
 import authTokenMiddleware from "../../../../middlewares/auth-token-middleware.js";
+import uploadFile from "../../../../middlewares/upload-file-middleware.js";
 import validateCredentials from "../../../../middlewares/validate-credentials-middleware.js";
 import validateQueryParamsCredentials from "../../../../middlewares/validate-query-params-credentials-middleware.js";
 import tryCatch from "../../../../utils/tryCatcher.js";
@@ -36,16 +37,21 @@ class QuizQuestionRoutes extends BaseRoutes {
       tryCatch(QuizQuestionController.getAll),
     ]);
 
-    this.router.get("/:id", [validateParams(getQuizQuestionByIdSchema), tryCatch(QuizQuestionController.getById)]);
+    this.router.get("/:id", [
+      validateParams(getQuizQuestionByIdSchema),
+      tryCatch(QuizQuestionController.getById),
+    ]);
 
     this.router.post("/", [
       authTokenMiddleware.authenticate,
+      uploadFile("image").single("image"),
       validateCredentials(createQuizQuestionSchema),
       tryCatch(QuizQuestionController.create),
     ]);
 
     this.router.patch("/:id", [
       authTokenMiddleware.authenticate,
+      uploadFile("image").single("image"),
       validateParams(getQuizQuestionByIdSchema),
       validateCredentials(updateQuizQuestionSchema),
       tryCatch(QuizQuestionController.update),

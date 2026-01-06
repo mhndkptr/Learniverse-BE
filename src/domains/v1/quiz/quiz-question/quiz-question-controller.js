@@ -1,5 +1,8 @@
 import BaseError from "../../../../base-classes/base-error.js";
-import { createdResponse, successResponse } from "../../../../utils/response.js";
+import {
+  createdResponse,
+  successResponse,
+} from "../../../../utils/response.js";
 import QuizQuestionService from "./quiz-question-service.js";
 
 class QuizQuestionController {
@@ -19,7 +22,11 @@ class QuizQuestionController {
 
     const data = await QuizQuestionService.getById(id);
 
-    return successResponse(res, data, "Quiz question data retrieved successfully");
+    return successResponse(
+      res,
+      data,
+      "Quiz question data retrieved successfully"
+    );
   }
 
   async create(req, res) {
@@ -29,7 +36,7 @@ class QuizQuestionController {
 
     const value = req.body;
 
-    const data = await QuizQuestionService.create(value, req.user);
+    const data = await QuizQuestionService.create(value, req.user, req?.file);
 
     return createdResponse(res, data, "Quiz question created successfully");
   }
@@ -42,7 +49,12 @@ class QuizQuestionController {
     const { id } = req.params;
     const value = req.body;
 
-    const data = await QuizQuestionService.update(id, value, req.user);
+    const data = await QuizQuestionService.update(
+      id,
+      value,
+      req.user,
+      req?.file
+    );
 
     return successResponse(res, data, "Quiz question updated successfully");
   }

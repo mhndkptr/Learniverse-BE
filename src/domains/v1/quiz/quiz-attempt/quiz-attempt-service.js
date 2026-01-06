@@ -147,6 +147,16 @@ class QuizAttemptService {
       ]);
     }
 
+    if (quizExists?.status !== "PUBLISH") {
+      throw BaseError.badRequest(
+        "Cannot attempt a quiz that is not published."
+      );
+    }
+
+    if (quizExists?.end_date && new Date(quizExists.end_date) < new Date()) {
+      throw BaseError.badRequest("Cannot attempt a quiz that has ended.");
+    }
+
     const userExists = await this.prisma.User.findUnique({
       where: { id: user.id },
     });
